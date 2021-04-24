@@ -138,33 +138,35 @@ function startGame(err) {
     var pattern;
 
     function drawCamera(g, next) {
-      var ptm = getPixelsPerMeter();
+      // var ptm = getPixelsPerMeter();
 
-      // Draw background.
-      // if (!pattern) {
-      //   pattern = g.context.createPattern(images.background, "repeat");
-      // }
-      g.fillStyle("white");
-      g.fillRectangle(game.camera.x, game.camera.y, game.width, game.height);
+      // // Draw background.
+      // // if (!pattern) {
+      // //   pattern = g.context.createPattern(images.background, "repeat");
+      // // }
+      // g.fillStyle("white");
+      // g.fillRectangle(game.camera.x, game.camera.y, game.width, game.height);
 
-      g.save();
-      g.context.translate(-game.camera.x * ptm, game.camera.y * ptm);
-      g.fillStyle(pattern);
-      g.fillRectangle(
-        game.camera.x * ptm,
-        -game.camera.y * ptm,
-        game.width,
-        game.height
-      );
-      g.restore();
+      // g.save();
+      // g.context.translate(-game.camera.x * ptm, game.camera.y * ptm);
+      // g.fillStyle(pattern);
+      // g.fillRectangle(
+      //   game.camera.x * ptm,
+      //   -game.camera.y * ptm,
+      //   game.width,
+      //   game.height
+      // );
+      // g.restore();
 
-      // Transform viewport to match camera.
-      g.save();
-      g.context.scale(ptm, ptm);
-      g.context.lineWidth /= ptm;
-      g.context.translate(-game.camera.x, game.camera.y);
+      // // Transform viewport to match camera.
+      // g.save();
+      // g.context.scale(ptm, ptm);
+      // g.context.lineWidth /= ptm;
+      // g.context.translate(-game.camera.x, game.camera.y);
+      // next(g);
+      // g.restore();
+
       next(g);
-      g.restore();
     }
 
     function updateCamera() {
@@ -250,7 +252,6 @@ function startGame(err) {
   class Start {
     constructor({ x, y }) {
       this.position = new Vector(x, y);
-      this.tile = images.box;
     }
 
     start() {
@@ -295,11 +296,9 @@ function startGame(err) {
       super({ x: 0, y: 0 });
       this.image = images["test"];
       this.velocity = new Vector(0, 0);
-      this.foreground = true;
     }
 
     drawForeground(g) {
-      console.log("kkoek");
       g.save();
       g.context.translate(this.position.x, this.position.y);
       g.drawCenteredImage(this.image, 0, 0);
@@ -547,7 +546,7 @@ function startGame(err) {
   function level_sym1() {
     return {
       name: "Test",
-      objects: [],
+      objects: [new Start({ x: 0, y: 0 })],
       clone: level_sym1,
       nextLevel: null,
     };
