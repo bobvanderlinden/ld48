@@ -25,7 +25,7 @@ import keyboard from "./keyboard.js";
 import quake from "./quake.js";
 import resources from "./resources.js";
 var rs = {
-  images: ["test", "clown"],
+  images: ["test", "clown", "submarine"],
   audio: ["test"]
 };
 var g, game;
@@ -282,7 +282,7 @@ function startGame(err) {
 
     constructor() {
       super({ x: 0, y: 0 });
-      this.image = images["test"];
+      this.image = images["submarine"];
       this.velocity = new Vector(0, 0);
     }
 
@@ -312,9 +312,9 @@ function startGame(err) {
       this.relativePosition = { x: 0, y: 0 };
       this.image = images["fish"];
       this.size = { width: 1, height: 1 };
-      this.angle = 0; // With real degree stuff
-      this.boundaries = { left: 50, right: 50, top: 0, bottom: 0 };
-      this.speed = 10;
+      this.angle = 180; // With real degree stuff
+      this.boundaries = { left: 500, right: 500, top: 0, bottom: 0 };
+      this.speed = 400;
     }
     update(dt) {
       this.relativePosition.x +=
@@ -357,6 +357,7 @@ function startGame(err) {
     drawForeground(g) {
       g.save();
       g.context.translate(this.position.x, this.position.y);
+      g.context.scale(this.angle === 0 ? -1 : 1, 1);
       g.drawCenteredImage(this.image, 0, 0);
       g.restore();
     }
