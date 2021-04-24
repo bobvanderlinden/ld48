@@ -300,7 +300,7 @@ function startGame(err) {
       this.relativePosition = { x: 0, y: 0 };
       this.image = images["fish"];
       this.size = { width: 1, height: 1 };
-      this.angle = 90; // We use compas 0 is North E 90 S 180 W270, 90 is default to the right
+      this.angle = 0; // With real degree stuff
       this.boundaries = { left: 50, right: 50, top: 0, bottom: 0 };
       this.speed = 10;
     }
@@ -314,7 +314,7 @@ function startGame(err) {
         this.startPosition.x + this.boundaries.right <
         this.relativePosition.x
       ) {
-        this.angle = -this.angle;
+        this.angle = 180;
         this.relativePosition.x +=
           this.startPosition.x +
           this.boundaries.right -
@@ -323,10 +323,9 @@ function startGame(err) {
         this.startPosition.x - this.boundaries.left >
         this.relativePosition.x
       ) {
-        this.angle = -this.angle;
+        this.angle = 0;
         this.relativePosition.x +=
-          this.relativePosition.x +
-          (this.startPosition.x - this.boundaries.left);
+          this.startPosition.x - this.boundaries.left - this.relativePosition.x;
       }
 
       // if (this.startPosition.y - this.boundaries.top > this.relativePosition.y) {
