@@ -13,11 +13,11 @@ export default function (game) {
     var t2 = new Vector(0, 0);
 
     var collisionlines = [];
-    game.objects.lists.collidable.each((o) => {
+    for (const o of game.objects.lists.collidable) {
       collisionlines = collisionlines.concat(o.collisionlines);
-    });
+    }
 
-    game.objects.lists.collide.each((o) => {
+    for (const o of game.objects.lists.collide) {
       if (!o.velocity) {
         return;
       }
@@ -98,6 +98,6 @@ export default function (game) {
           break;
         }
       }
-    });
+    }
   }
 }
