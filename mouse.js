@@ -6,10 +6,10 @@ export default function(g) {
     buttons: {}
   };
   function getX(e) {
-    return e.pageX - g.canvas.offsetLeft;
+    return e.pageX - g.canvas.getBoundingClientRect().x;
   }
   function getY(e) {
-    return e.pageY - g.canvas.offsetTop;
+    return e.pageY - g.canvas.getBoundingClientRect().y;
   }
   g.canvas.addEventListener(
     "mouseup",
