@@ -6,9 +6,23 @@
   box-sizing: border-box;
 }
 
+canvas {
+  height: 90vh;
+  max-width: 70vh;
+}
+
 body {
   margin: 0;
   overflow: hidden;
   font-family: arial, sans-serif;
   font-size: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #36096d;
+  background-image: linear-gradient(315deg, #36096d 0%, #37d5d6 74%);
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100vh;
+}
 }
