@@ -287,6 +287,33 @@ function startGame(err) {
     }
   }
 
+  class Fish extends GameObject {
+    constructor() {
+      super({ x: 0, y: 0 });
+      this.image = images["fish"];
+      this.size = { width: 1, height: 1 };
+    }
+    move() {
+      this.position = { x: this.position.x + 1, y: this.position.y };
+    }
+  }
+
+  class ClownFish extends Fish {
+    constructor() {
+      super({ x: 15, y: 10 });
+      this.image = images["clown"];
+      this.size = { width: 1, height: 1 };
+    }
+  }
+
+  class FootballFish extends Fish {
+    constructor() {
+      super({ x: 10, y: 5 });
+      this.image = images["football"];
+      this.size = { width: 2, height: 2 };
+    }
+  }
+
   _defineProperty(Player, "updatable", true);
 
   _defineProperty(Player, "foreground", true);
