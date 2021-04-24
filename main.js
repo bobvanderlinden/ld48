@@ -349,10 +349,10 @@ function startGame(err) {
 
       //   // TODO: Flip angle en restant movement
       // }
-      this.position = {
-        x: this.startPosition.x + this.relativePosition.x,
-        y: this.startPosition.y + this.relativePosition.y
-      };
+      this.position = new Vector(
+        this.startPosition.x + this.relativePosition.x,
+        this.startPosition.y + this.relativePosition.y
+      );
     }
     drawForeground(g) {
       g.save();
