@@ -1,19 +1,19 @@
 export default {
-  _inherit: function(o) {
+  _inherit: function (o) {
     o._getEvents = this._getEvents;
     o.on = this.on;
     o.once = this.once;
     o.removeListener = this.removeListener;
     o.emit = this.emit;
   },
-  _getEvents: function() {
+  _getEvents: function () {
     var e = this.events;
     if (!e) {
       return (this.events = e = {});
     }
     return e;
   },
-  on: function(name, fun) {
+  on: function (name, fun) {
     var me = this;
     var l = me._getEvents()[name];
     if (!l) {
@@ -22,7 +22,7 @@ export default {
     l.push(fun);
     return this;
   },
-  once: function(name, fun) {
+  once: function (name, fun) {
     var me = this;
     me.on(name, function wrapper(/*...*/) {
       if (me.removeListener(name, wrapper)) {
@@ -30,7 +30,7 @@ export default {
       }
     });
   },
-  removeListener: function(name, fun) {
+  removeListener: function (name, fun) {
     var me = this;
     var l = me._getEvents()[name];
     if (l) {
@@ -42,15 +42,15 @@ export default {
     }
     return false;
   },
-  emit: function(/* name, ... */) {
+  emit: function (/* name, ... */) {
     var me = this;
     var name = arguments[0];
     var callbackArguments = Array.prototype.slice.call(arguments, 1);
     var l = this._getEvents()[name];
     if (l) {
-      l.forEach(f => {
+      l.forEach((f) => {
         f.apply(me, callbackArguments);
       });
     }
-  }
+  },
 };

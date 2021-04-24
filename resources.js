@@ -4,11 +4,11 @@ function extend(a, b) {
     a[n] = b[n];
   }
 }
-export default function(rs) {
+export default function (rs) {
   var preloadStatus = {
     ready: 0,
     total: 0,
-    errors: 0
+    errors: 0,
   };
   extend(preloadStatus, eventemitter);
 
@@ -17,7 +17,7 @@ export default function(rs) {
     images: {},
     audio: {},
     loadImage: loadImage,
-    loadAudio: loadAudio
+    loadAudio: loadAudio,
   };
 
   function loadImage(name, callback) {
@@ -29,11 +29,11 @@ export default function(rs) {
     }
     img = new Image();
     img.src = "assets/" + name + ".png";
-    img.onload = function() {
+    img.onload = function () {
       me.images[name] = img;
       callback(null, img);
     };
-    img.onerror = function() {
+    img.onerror = function () {
       callback("Could not load image " + name);
     };
     return img;
@@ -80,7 +80,7 @@ export default function(rs) {
 
   var isPreloaded = false;
   var onpreloaded = null;
-  preload(resources, rs, err => {
+  preload(resources, rs, (err) => {
     if (err) {
       console.error(err);
     }
@@ -90,7 +90,7 @@ export default function(rs) {
     }
   });
 
-  return function(g, callback) {
+  return function (g, callback) {
     g.resources = resources;
     if (!isPreloaded) {
       onpreloaded = callback;
@@ -107,7 +107,7 @@ function preload(resources, preloadResources, callback) {
     if (!preloadResources[type]) {
       return;
     }
-    preloadResources[type].forEach(name => {
+    preloadResources[type].forEach((name) => {
       status.total++;
       loadfunction.call(resources, name, onResourceLoaded);
     });

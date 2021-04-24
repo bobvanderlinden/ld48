@@ -17,7 +17,7 @@ function mix(target, source) {
     }
   }
 }
-export default function(/* prototype?, mixins..., methods */) {
+export default function (/* prototype?, mixins..., methods */) {
   var args = Array.prototype.slice.call(arguments);
 
   var methods = args.pop();
@@ -33,7 +33,7 @@ export default function(/* prototype?, mixins..., methods */) {
 
   methods.prototype = prototype;
 
-  mixins.forEach(mixin => {
+  mixins.forEach((mixin) => {
     mix(methods, mixin);
   });
 

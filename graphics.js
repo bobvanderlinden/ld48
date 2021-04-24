@@ -2,42 +2,42 @@ function Graphics(context) {
   this.context = context;
 }
 var p = Graphics.prototype;
-p.resizeCanvas = function() {
+p.resizeCanvas = function () {
   this.context.canvas.width = window.innerWidth;
   this.context.canvas.height = window.innerHeight;
 };
-p.clear = function() {
+p.clear = function () {
   this.save();
   this.context.setTransform(1, 0, 0, 1, 0, 0);
   this.context.clearRect(0, 0, 9000, 9000);
   this.restore();
 };
-p.fillStyle = function(s) {
+p.fillStyle = function (s) {
   if (s) {
     this.context.fillStyle = s;
   } else {
     return s;
   }
 };
-p.strokeStyle = function(s) {
+p.strokeStyle = function (s) {
   if (s) {
     this.context.strokeStyle = s;
   } else {
     return s;
   }
 };
-p.font = function(font) {
+p.font = function (font) {
   this.context.font = font;
 };
-p.circle = function(x, y, radius) {
+p.circle = function (x, y, radius) {
   this.context.beginPath();
   this.context.arc(x, y, radius, 0, Math.PI * 2, true);
   this.context.closePath();
 };
-p.rectangle = function(x, y, w, h) {
+p.rectangle = function (x, y, w, h) {
   this.context.rect(x, y, w, h);
 };
-p.polygon = function(points) {
+p.polygon = function (points) {
   this.context.beginPath();
   if (points.length > 0) {
     this.context.moveTo(points[0].x, points[0].y);
@@ -47,29 +47,29 @@ p.polygon = function(points) {
   }
   this.context.closePath();
 };
-p.strokePolygon = function(points) {
+p.strokePolygon = function (points) {
   this.polygon(points);
   this.context.stroke();
 };
-p.fillPolygon = function(points) {
+p.fillPolygon = function (points) {
   this.polygon(points);
   this.context.fill();
 };
-p.strokeRectangle = function(x, y, w, h) {
+p.strokeRectangle = function (x, y, w, h) {
   this.context.strokeRect(x, y, w, h);
 };
-p.fillRectangle = function(x, y, w, h) {
+p.fillRectangle = function (x, y, w, h) {
   this.context.fillRect(x, y, w, h);
 };
-p.strokeCircle = function(x, y, radius) {
+p.strokeCircle = function (x, y, radius) {
   this.circle(x, y, radius);
   this.context.stroke();
 };
-p.fillCircle = function(x, y, radius) {
+p.fillCircle = function (x, y, radius) {
   this.circle(x, y, radius);
   this.context.fill();
 };
-p.fillLoading = function(x, y, radius, fraction) {
+p.fillLoading = function (x, y, radius, fraction) {
   var c = this.context;
   var abegin = (fraction * 360 - 90) * (Math.PI / 180);
   var aend = (0 - 90) * (Math.PI / 180);
@@ -82,7 +82,7 @@ p.fillLoading = function(x, y, radius, fraction) {
   c.closePath();
   c.fill();
 };
-p.shadow = function(color, blur, offx, offy, fn) {
+p.shadow = function (color, blur, offx, offy, fn) {
   this.context.shadowColor = color;
   this.context.shadowBlur = blur;
   this.context.shadowOffsetX = offx;
@@ -93,24 +93,24 @@ p.shadow = function(color, blur, offx, offy, fn) {
   this.context.shadowOffsetX = 0;
   this.context.shadowOffsetY = 0;
 };
-p.line = function(x1, y1, x2, y2) {
+p.line = function (x1, y1, x2, y2) {
   this.context.beginPath();
   this.context.moveTo(x1, y1);
   this.context.lineTo(x2, y2);
   this.context.closePath();
 };
-p.strokeLine = function(x1, y1, x2, y2) {
+p.strokeLine = function (x1, y1, x2, y2) {
   this.line(x1, y1, x2, y2);
   this.context.stroke();
 };
 
-p.translate = function(x, y, translated) {
+p.translate = function (x, y, translated) {
   this.save();
   this.context.translate(x, y);
   translated();
   this.restore();
 };
-p.rotate = function(x, y, r, rotated) {
+p.rotate = function (x, y, r, rotated) {
   this.save();
   this.context.translate(x, y);
   this.context.rotate(r);
@@ -118,7 +118,7 @@ p.rotate = function(x, y, r, rotated) {
   rotated();
   this.restore();
 };
-p.scale = function(x, y, sx, sy, scaled) {
+p.scale = function (x, y, sx, sy, scaled) {
   this.save();
   this.context.translate(x, y);
   this.context.scale(sx, sy);
@@ -126,7 +126,7 @@ p.scale = function(x, y, sx, sy, scaled) {
   scaled();
   this.restore();
 };
-p.scalerotate = function(x, y, sx, sy, r, rotatedscaled) {
+p.scalerotate = function (x, y, sx, sy, r, rotatedscaled) {
   this.save();
   this.context.translate(x, y);
   this.context.rotate(r);
@@ -135,31 +135,31 @@ p.scalerotate = function(x, y, sx, sy, r, rotatedscaled) {
   rotatedscaled();
   this.restore();
 };
-p.drawImage = function(img, sx, sy, sw, sh, dx, dy, dw, dh) {
+p.drawImage = function (img, sx, sy, sw, sh, dx, dy, dw, dh) {
   if (img) {
     this.context.drawImage.apply(this.context, arguments);
   }
 };
-p.drawCenteredImage = function(img, x, y) {
+p.drawCenteredImage = function (img, x, y) {
   if (img) {
     this.context.drawImage(img, x - img.width / 2, y - img.height / 2);
   }
 };
-p.fillCenteredText = function(text, x, y) {
+p.fillCenteredText = function (text, x, y) {
   var size = this.context.measureText(text);
   this.context.fillText(text, x - size.width / 2, y);
 };
-p.fillText = function(text, x, y) {
+p.fillText = function (text, x, y) {
   this.context.fillText(text, x, y);
 };
-p.save = function() {
+p.save = function () {
   if (!this._depth) {
     this._depth = 0;
   }
   this._depth++;
   this.context.save();
 };
-p.restore = function() {
+p.restore = function () {
   if (this._depth <= 0) {
     console.log("NOES");
     throw "NOES";

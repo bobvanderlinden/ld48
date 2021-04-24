@@ -6,7 +6,7 @@ function LineSegment(startx, starty, endx, endy) {
   this.recalculate();
 }
 var p = LineSegment.prototype;
-p.recalculate = function() {
+p.recalculate = function () {
   var n = this.normal;
   n.setV(this.end);
   n.substractV(this.start);

@@ -1,6 +1,6 @@
-export default function(g) {
+export default function (g) {
   g.state = null;
-  g.changeState = function(state) {
+  g.changeState = function (state) {
     if (this.state) {
       this.state.disable();
     }
@@ -10,6 +10,6 @@ export default function(g) {
     }
   };
   return {
-    create: function(obj) {}
+    create: function (obj) {},
   };
 }

@@ -3,38 +3,38 @@ function Vector(x, y) {
   this.y = y;
 }
 var p = Vector.prototype;
-p.set = function(x, y) {
+p.set = function (x, y) {
   this.x = x;
   this.y = y;
   return this;
 };
-p.add = function(x, y) {
+p.add = function (x, y) {
   this.x += x;
   this.y += y;
   return this;
 };
-p.substract = function(x, y) {
+p.substract = function (x, y) {
   this.x -= x;
   this.y -= y;
   return this;
 };
-p.multiply = function(f) {
+p.multiply = function (f) {
   this.x *= f;
   this.y *= f;
   return this;
 };
-p.divide = function(f) {
+p.divide = function (f) {
   this.x /= f;
   this.y /= f;
   return this;
 };
-p.length = function() {
+p.length = function () {
   return Math.sqrt(this.x * this.x + this.y * this.y);
 };
-p.length2 = function() {
+p.length2 = function () {
   return this.x * this.x + this.y * this.y;
 };
-p.distanceTo = function(x, y) {
+p.distanceTo = function (x, y) {
   var dx = this.x - x;
   dx *= dx;
   var dy = this.y - y;
@@ -42,7 +42,7 @@ p.distanceTo = function(x, y) {
   //console.log(dy);
   return Math.sqrt(dx + dy);
 };
-p.normalize = function() {
+p.normalize = function () {
   var l = this.length();
   if (l === 0.0) {
     throw "Normalizing 0!";
@@ -51,7 +51,7 @@ p.normalize = function() {
   this.y /= l;
   return this;
 };
-p.normalizeOr = function(x, y) {
+p.normalizeOr = function (x, y) {
   var l = this.length();
   if (l === 0.0) {
     this.x = x;
@@ -62,43 +62,43 @@ p.normalizeOr = function(x, y) {
   this.y /= l;
   return this;
 };
-p.normalizeOrZero = function() {
+p.normalizeOrZero = function () {
   return this.normalizeOr(0, 0);
 };
-p.dot = function(x, y) {
+p.dot = function (x, y) {
   return this.x * x + this.y * y;
 };
-p.negate = function() {
+p.negate = function () {
   this.x = -this.x;
   this.y = -this.y;
   return this;
 };
-p.normalRight = function() {
+p.normalRight = function () {
   var tmp = this.x;
   this.x = -this.y;
   this.y = tmp;
   return this;
 };
-p.normalLeft = function() {
+p.normalLeft = function () {
   var tmp = this.x;
   this.x = this.y;
   this.y = -tmp;
   return this;
 };
-p.equals = function(x, y) {
+p.equals = function (x, y) {
   return this.x === x && this.y === y;
 };
-p.toString = function() {
+p.toString = function () {
   return "Vector(" + this.x + "," + this.y + ")";
 };
-p.rotate = function(r) {
+p.rotate = function (r) {
   var l = this.length();
   var nr = Math.atan2(this.y, this.x) + r;
   this.x = Math.cos(nr) * l;
   this.y = Math.sin(nr) * l;
   return this;
 };
-p.angleToward = function(x, y) {
+p.angleToward = function (x, y) {
   var a1 = Math.atan2(this.y, this.x);
   var a2 = Math.atan2(y, x);
 
@@ -107,16 +107,16 @@ p.angleToward = function(x, y) {
 
   return a2 - a1;
 };
-p.angle = function() {
+p.angle = function () {
   return Math.atan2(this.y, this.x);
 };
-p.clone = function() {
+p.clone = function () {
   return new Vector(this.x, this.y);
 };
 
 // Add helper vector-functions.
 function unzipV(f) {
-  return function(v) {
+  return function (v) {
     return f.call(this, v.x, v.y);
   };
 }
@@ -131,7 +131,7 @@ p.equalsV = unzipV(p.equals);
 p.distanceToV = unzipV(p.distanceTo);
 p.angleTowardV = unzipV(p.angleToward);
 
-Vector.distance = function(x1, y1, x2, y2) {
+Vector.distance = function (x1, y1, x2, y2) {
   var dx = x1 - x2;
   dx *= dx;
   var dy = y1 - y2;

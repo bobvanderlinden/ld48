@@ -6,7 +6,7 @@ function chain(fs, next) {
     if (i < fs.length) {
       var f = fs[i];
       var fargs = [
-        function() {
+        function () {
           return call(i + 1, arguments);
         },
       ];
@@ -16,7 +16,7 @@ function chain(fs, next) {
       return next.apply(null, args);
     }
   }
-  return function(/*...*/) {
+  return function (/*...*/) {
     call(0, arguments);
   };
 }
@@ -32,7 +32,7 @@ function Game(start, canvas, components) {
   };
 
   this.chains.draw.push(
-    (this.chains.draw.objects = function(g, next) {
+    (this.chains.draw.objects = function (g, next) {
       me.objects.lists.draw.each((o) => {
         o.draw(g);
       });
@@ -73,17 +73,17 @@ var p = Game.prototype;
 eventemitter._inherit(p);
 
 Object.defineProperty(p, "width", {
-  get: function() {
+  get: function () {
     return this.canvas.width;
   },
 });
 Object.defineProperty(p, "height", {
-  get: function() {
+  get: function () {
     return this.canvas.height;
   },
 });
 
-p.start = function() {
+p.start = function () {
   if (this.isRunning) {
     throw "Already started";
   }
@@ -93,7 +93,7 @@ p.start = function() {
   me.running = runningToken;
   this.canvas.setAttribute("tabIndex", "0");
   this.canvas.focus();
-  this.canvas.oncontextmenu = function() {
+  this.canvas.oncontextmenu = function () {
     return false;
   };
 
@@ -102,7 +102,7 @@ p.start = function() {
     window.mozRequestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
     window.msRequestAnimationFrame ||
-    function(callback) {
+    function (callback) {
       window.setTimeout(callback, 1000 / 60);
     };
 
@@ -131,7 +131,7 @@ p.start = function() {
     }
   }
 };
-p.stop = function() {
+p.stop = function () {
   delete this.running;
 };
 export default Game;

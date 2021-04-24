@@ -190,6 +190,56 @@ function startGame(err) {
     g.chains.draw.insertBefore(drawCamera, g.chains.draw.objects);
   })();
 
+  // Touching
+  (function() {
+    g.objects.lists.touchable = g.objects.createIndexList("touchable");
+    g.chains.update.insertBefore(function(dt, next) {
+      next(dt);
+      g.objects.lists.touchable.each(function(ta) {
+        g.objects.lists.touchable.each(function(tb) {
+          detectTouch(ta, tb);
+        });
+        if (ta.touching) {
+          ta.touching.forEach(function(tb) {
+            detectTouch(ta, tb);
+          });
+        }
+      });
+    }, g.chains.update.objects);
+
+    function detectTouch(ta, tb) {
+      if (ta === tb) {
+        return;
+      }
+      var areTouching =
+        ta._objectmanager &&
+        tb._objectmanager &&
+        ta.position.distanceToV(tb.position) <= ta.touchRadius + tb.touchRadius;
+      handleTouch(ta, tb, areTouching);
+      handleTouch(tb, ta, areTouching);
+    }
+
+    function handleTouch(o, other, areTouching) {
+      if (!o.touching) {
+        o.touching = new Set();
+      }
+      var wereTouching = o.touching.has(other);
+      if (areTouching !== wereTouching) {
+        if (areTouching) {
+          o.touching.add(other);
+          if (o.touch) {
+            o.touch(other);
+          }
+        } else {
+          o.touching.delete(other);
+          if (o.untouch) {
+            o.untouch(other);
+          }
+        }
+      }
+    }
+  })();
+
   (function() {
     game.chains.draw.push((g, next) => {
       game.objects.lists.background.each(o => {
@@ -205,16 +255,9 @@ function startGame(err) {
   // Draw debug objects
   game.chains.draw.push(function(g, next) {
     next(g);
-    game.objects.lists.foreground.each(o => {
-      if (o.child) {
-        g.strokeStyle("red");
-        g.strokeLine(
-          o.position.x,
-          o.position.y,
-          o.child.position.x,
-          o.child.position.y
-        );
-      }
+    game.objects.lists.touchable.each(o => {
+      g.strokeStyle("red");
+      g.strokeCircle(o.position.x, o.position.y, o.touchRadius);
     });
   });
   // (function() {
@@ -279,23 +322,41 @@ function startGame(err) {
 
   class Player extends GameObject {
     sinkRate = 200;
+    touchable = true;
+    touchRadius = 150;
 
     constructor() {
       super({ x: 0, y: 0 });
       this.image = images["submarine"];
       this.velocity = new Vector(0, 0);
+      this.flipped = false;
     }
 
     drawForeground(g) {
-      g.drawCenteredImage(this.image, this.position.x, this.position.y);
+      g.save();
+      g.context.translate(this.position.x, this.position.y);
+      g.context.scale(this.flipped ? -1 : 1, 1);
+      g.drawCenteredImage(this.image, 0, 0);
+      g.restore();
     }
 
     update(dt) {
       const mousePosition = new Vector(0, 0);
       game.camera.screenToWorld(game.mouse, mousePosition);
 
+      if (this.position.x !== mousePosition.x) {
+        this.flipped = this.position.x > mousePosition.x;
+      }
+
       this.position.x = mousePosition.x;
       this.position.y += dt * this.sinkRate;
+    }
+
+    touch(other) {
+      console.log("touch");
+      if (other instanceof Fish) {
+        game.changeState(loseState());
+      }
     }
   }
 
@@ -326,6 +387,9 @@ function startGame(err) {
   class Fish extends GameObject {
     updatable = true;
     foreground = true;
+    touchable = true;
+    touchRadius = 100;
+
     constructor(x, y, angle, speed) {
       super(...arguments);
       this.startPosition = new Vector(x, y);
@@ -601,7 +665,9 @@ function startGame(err) {
     g.context.scale(scale, scale);
     g.drawCenteredImage(image, game.width / 2 / scale, game.height / 2 / scale);
     g.restore();
-  } //#states
+  }
+
+  //#states
 
   function gameplayState() {
     const me = {
@@ -662,12 +728,47 @@ function startGame(err) {
       name: "Test",
       objects: [
         new Start({ x: 0, y: 0 }),
-        new ClownFish({ x: 0, y: 0 }),
+        new ClownFish({ x: 0, y: 500 }),
         new Octopus()
       ],
       clone: level_sym1,
       nextLevel: null
     };
+  }
+
+  function loseState() {
+    const me = {
+      enabled: false,
+      enable: enable,
+      disable: disable
+    };
+
+    function enable() {
+      g.chains.draw.unshift(draw);
+      g.chains.update.unshift(update);
+      g.on("keydown", keydown);
+    }
+
+    function disable() {
+      g.chains.draw.remove(draw);
+      g.chains.update.remove(update);
+      g.removeListener("keydown", keydown);
+    }
+
+    function draw(g, next) {
+      next(g);
+      g.fillStyle("black");
+      g.fillText("You killed a fish", game.width * 0.5, game.height * 0.5);
+    }
+
+    function update(dt, next) {}
+
+    function keydown() {
+      g.restartLevel();
+      g.changeState(gameplayState());
+    }
+
+    return me;
   }
 
   var player = new Player();
