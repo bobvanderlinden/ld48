@@ -25,7 +25,7 @@ import keyboard from "./keyboard.js";
 import quake from "./quake.js";
 import resources from "./resources.js";
 var rs = {
-  images: ["test"],
+  images: ["test", "clown"],
   audio: ["test"]
 };
 var g, game;
@@ -291,20 +291,73 @@ function startGame(err) {
     }
   }
 
+  function toRadians(angle) {
+    return angle * (Math.PI / 180);
+  }
+
   class Fish extends GameObject {
-    constructor() {
-      super({ x: 0, y: 0 });
+    updatable = true;
+    foreground = true;
+    constructor({ x, y }) {
+      super(...arguments);
+      this.startPosition = { x: x, y: y };
+      this.relativePosition = { x: 0, y: 0 };
       this.image = images["fish"];
       this.size = { width: 1, height: 1 };
+      this.angle = 90; // We use compas 0 is North E 90 S 180 W270, 90 is default to the right
+      this.boundaries = { left: 50, right: 50, top: 0, bottom: 0 };
+      this.speed = 10;
     }
-    move() {
-      this.position = { x: this.position.x + 1, y: this.position.y };
+    update(dt) {
+      this.relativePosition.x +=
+        dt * this.speed * Math.cos(toRadians(this.angle));
+      this.relativePosition.y +=
+        Math.sin(toRadians(this.angle)) * dt * this.speed;
+
+      if (
+        this.startPosition.x + this.boundaries.right <
+        this.relativePosition.x
+      ) {
+        this.angle = -this.angle;
+        this.relativePosition.x +=
+          this.startPosition.x +
+          this.boundaries.right -
+          this.relativePosition.x;
+      } else if (
+        this.startPosition.x - this.boundaries.left >
+        this.relativePosition.x
+      ) {
+        this.angle = -this.angle;
+        this.relativePosition.x +=
+          this.relativePosition.x +
+          (this.startPosition.x - this.boundaries.left);
+      }
+
+      // if (this.startPosition.y - this.boundaries.top > this.relativePosition.y) {
+      //   this.angle = -this.angle;
+
+      //   // TOOD: hier moeten we flippen naar links en movement omdraaien
+      // } else if (this.startPosition.x + this.boundaries.bottom < this.relativePosition.y) {
+      //   this.angle = -this.angle;
+
+      //   // TODO: Flip angle en restant movement
+      // }
+      this.position = {
+        x: this.startPosition.x + this.relativePosition.x,
+        y: this.startPosition.y + this.relativePosition.y
+      };
+    }
+    drawForeground(g) {
+      g.save();
+      g.context.translate(this.position.x, this.position.y);
+      g.drawCenteredImage(this.image, 0, 0);
+      g.restore();
     }
   }
 
   class ClownFish extends Fish {
     constructor() {
-      super({ x: 15, y: 10 });
+      super({ x: 0, y: 0 });
       this.image = images["clown"];
       this.size = { width: 1, height: 1 };
     }
@@ -562,7 +615,7 @@ function startGame(err) {
   function level_sym1() {
     return {
       name: "Test",
-      objects: [new Start({ x: 0, y: 0 })],
+      objects: [new Start({ x: 0, y: 0 }), new ClownFish({ x: 0, y: 0 })],
       clone: level_sym1,
       nextLevel: null
     };
