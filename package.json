@@ -21,5 +21,6 @@
   "bugs": {
     "url": "https://github.com/bobvanderlinden/ld48/issues"
   },
-  "homepage": "https://github.com/bobvanderlinden/ld48#readme"
+  "homepage": "https://github.com/bobvanderlinden/ld48#readme",
+  "prettier": {}
 }
