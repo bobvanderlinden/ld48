@@ -103,11 +103,7 @@ function startGame(err) {
     game.camera = new Vector(0, 0);
 
     game.camera.zoom = 1;
-    game.camera.PTM = 512;
-    game.camera.x = -(game.width * 0.5) / getPixelsPerMeter();
-    game.camera.y = (game.height * 0.5) / getPixelsPerMeter();
-    game.camera.smoothx = game.camera.x;
-    game.camera.smoothy = game.camera.x;
+    game.camera.PTM = 1;
 
     game.camera.screenToWorld = function(screenV, out) {
       var ptm = getPixelsPerMeter();
@@ -138,60 +134,38 @@ function startGame(err) {
     var pattern;
 
     function drawCamera(g, next) {
-      // var ptm = getPixelsPerMeter();
+      var ptm = getPixelsPerMeter();
 
-      // // Draw background.
-      // // if (!pattern) {
-      // //   pattern = g.context.createPattern(images.background, "repeat");
-      // // }
-      // g.fillStyle("white");
-      // g.fillRectangle(game.camera.x, game.camera.y, game.width, game.height);
+      // Draw background.
+      // if (!pattern) {
+      //   pattern = g.context.createPattern(images.background, "repeat");
+      // }
+      g.fillStyle("white");
+      g.fillRectangle(game.camera.x, game.camera.y, game.width, game.height);
 
-      // g.save();
-      // g.context.translate(-game.camera.x * ptm, game.camera.y * ptm);
-      // g.fillStyle(pattern);
-      // g.fillRectangle(
-      //   game.camera.x * ptm,
-      //   -game.camera.y * ptm,
-      //   game.width,
-      //   game.height
-      // );
-      // g.restore();
+      g.save();
+      g.context.translate(-game.camera.x * ptm, game.camera.y * ptm);
+      g.fillStyle(pattern);
+      g.fillRectangle(
+        game.camera.x * ptm,
+        -game.camera.y * ptm,
+        game.width,
+        game.height
+      );
+      g.restore();
 
-      // // Transform viewport to match camera.
-      // g.save();
-      // g.context.scale(ptm, ptm);
-      // g.context.lineWidth /= ptm;
-      // g.context.translate(-game.camera.x, game.camera.y);
-      // next(g);
-      // g.restore();
-
+      // Transform viewport to match camera.
+      g.save();
+      g.context.scale(ptm, ptm);
+      g.context.lineWidth /= ptm;
+      g.context.translate(-game.camera.x, game.camera.y);
       next(g);
+      g.restore();
     }
 
     function updateCamera() {
-      var ptm = getPixelsPerMeter(); // Follow player
-
-      var targetx = player.position.x - (game.width * 0.5) / ptm; // center on screen except if we're at the bottom of the level, show just one empty row below the level
-
-      var targety = Math.max(
-        (game.height * 0.5) / ptm - player.position.y,
-        (game.height - 1.5 * ptm) / ptm
-      );
-      game.camera.targetx = targetx;
-      game.camera.targety = targety; // Look forward
-      // targetx += player.velocity.x * 10;
-      // targety += player.velocity.y * 10;
-      // Smooth
-
-      var smoothx = (game.camera.smoothx =
-        0.95 * game.camera.smoothx + 0.05 * targetx);
-      var smoothy = (game.camera.smoothy =
-        0.95 * game.camera.smoothy + 0.05 * targety);
-      game.camera.x = smoothx;
-      game.camera.y = smoothy; // No smoothing
-      // game.camera.x = targetx;
-      // game.camera.y = targety;
+      game.camera.x = -(game.width * 0.5) / getPixelsPerMeter();
+      game.camera.y = (game.height * 0.5) / getPixelsPerMeter();
     }
 
     g.chains.update.push(
@@ -202,7 +176,7 @@ function startGame(err) {
     );
     g.chains.draw.camera = drawCamera;
     g.chains.draw.insertBefore(drawCamera, g.chains.draw.objects);
-  })(); // Draw objects
+  })();
 
   (function() {
     game.chains.draw.push((g, next) => {
@@ -305,7 +279,12 @@ function startGame(err) {
       g.restore();
     }
 
-    update(dt) {}
+    update(dt) {
+      const mousePosition = new Vector(0, 0);
+      game.camera.screenToWorld(game.mouse, mousePosition);
+
+      this.position.x = mousePosition.x;
+    }
   }
 
   _defineProperty(Player, "updatable", true);
