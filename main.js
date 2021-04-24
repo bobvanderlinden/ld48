@@ -355,7 +355,7 @@ function startGame(err) {
     touch(other) {
       console.log("touch");
       if (other instanceof Fish) {
-        game.changeState(loseState());
+        game.changeState(new LoseState());
       }
     }
   }
@@ -559,7 +559,7 @@ function startGame(err) {
       } else if (key === "i") {
         load();
       } else if (key === "e") {
-        game.changeState(gameplayState());
+        game.changeState(new GameplayState());
       } else if (key === "r") {
         game.changeLevel(createLevel());
       }
@@ -631,27 +631,27 @@ function startGame(err) {
 
   //#states
 
-  function gameplayState() {
-    const me = {
-      enabled: false,
-      enable: enable,
-      disable: disable,
-    };
+  class GameplayState {
+    constructor() {
+      this.draw = this.draw.bind(this);
+      this.update = this.update.bind(this);
+      this.keydown = this.keydown.bind(this);
+    }
 
-    function enable() {
+    enable() {
       game.camera.reset();
-      g.chains.draw.unshift(draw);
-      g.chains.update.push(update);
-      g.on("keydown", keydown);
+      g.chains.draw.unshift(this.draw);
+      g.chains.update.push(this.update);
+      g.on("keydown", this.keydown);
     }
 
-    function disable() {
-      g.chains.draw.remove(draw);
-      g.chains.update.remove(update);
-      g.removeListener("keydown", keydown);
+    disable() {
+      g.chains.draw.remove(this.draw);
+      g.chains.update.remove(this.update);
+      g.removeListener("keydown", this.keydown);
     }
 
-    function keydown(key) {
+    keydown(key) {
       if (key === "r") {
         game.restartLevel();
         return;
@@ -662,7 +662,7 @@ function startGame(err) {
         game.changeLevel(level_sym1());
         return;
       } else if (key === "e") {
-        game.changeState(editorState());
+        game.changeState(new EditorState());
       }
 
       const movement = new Vector(
@@ -673,16 +673,14 @@ function startGame(err) {
       player.movement = movement;
     }
 
-    function update(dt) {
+    update(dt) {
       game.camera.y = player.position.y;
     }
 
-    function draw(g, next) {
+    draw(g, next) {
       // Draw HUD
       next(g);
     }
-
-    return me;
   }
 
   function level_sym1() {
@@ -694,44 +692,45 @@ function startGame(err) {
     };
   }
 
-  function loseState() {
-    const me = {
-      enabled: false,
-      enable: enable,
-      disable: disable,
-    };
-
-    function enable() {
-      g.chains.draw.unshift(draw);
-      g.chains.update.unshift(update);
-      g.on("mousedown", mousedown);
+  class LoseState {
+    constructor() {
+      this.draw = this.draw.bind(this);
+      this.mousedown = this.mousedown.bind(this);
+      this.update = this.update.bind(this);
     }
 
-    function disable() {
-      g.chains.draw.remove(draw);
-      g.chains.update.remove(update);
-      g.removeListener("mousedown", mousedown);
+    enable() {
+      g.chains.draw.unshift(this.draw);
+      g.chains.update.unshift(this.update);
+      g.on("mousedown", this.mousedown);
     }
 
-    function draw(g, next) {
+    disable() {
+      g.chains.draw.remove(this.draw);
+      g.chains.update.remove(this.update);
+      g.removeListener("mousedown", this.mousedown);
+    }
+
+    draw(g, next) {
       next(g);
       g.fillStyle("black");
       g.fillText("You killed a fish", game.width * 0.5, game.height * 0.5);
     }
 
-    function mousedown() {
+    mousedown() {
       g.restartLevel();
-      g.changeState(gameplayState());
+      g.changeState(new GameplayState());
     }
 
-    function update(dt, next) {}
-
-    return me;
+    update(dt, next) {
+      // Avoid updating the game.
+      //
+    }
   }
 
   var player = new Player();
   g.changeLevel(level_sym1());
-  g.changeState(gameplayState());
+  g.changeState(new GameplayState());
   game.objects.handlePending();
   g.start();
   window.game = game;
