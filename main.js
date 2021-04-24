@@ -50,7 +50,6 @@ platform.once("load", () => {
       300
     );
   });
-  window.onresize = g.graphics.resizeCanvas.bind(g.graphics);
 });
 
 function startGame(err) {
@@ -58,7 +57,6 @@ function startGame(err) {
     console.error(err);
   }
 
-  g.graphics.resizeCanvas();
   var images = g.resources.images;
   var audio = g.resources.audio;
   g.objects.lists.collidable = g.objects.createIndexList("collidable");

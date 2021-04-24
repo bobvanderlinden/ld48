@@ -119,6 +119,9 @@ p.start = function() {
 
     me.time += dt;
 
+    me.canvas.width = me.canvas.parentElement.clientWidth;
+    me.canvas.height = me.canvas.parentElement.clientHeight;
+
     me.graphics.clear();
 
     chain(me.chains.draw, g => {})(me.graphics);

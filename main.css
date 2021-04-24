@@ -6,9 +6,10 @@
   box-sizing: border-box;
 }
 
-canvas {
+#container {
   height: 90vh;
   max-width: 70vh;
+  overflow: hidden;
 }
 
 body {
