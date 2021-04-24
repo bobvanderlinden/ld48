@@ -6,7 +6,7 @@ function _defineProperty(obj, key, value) {
       value: value,
       enumerable: true,
       configurable: true,
-      writable: true
+      writable: true,
     });
   } else {
     obj[key] = value;
@@ -26,7 +26,7 @@ import quake from "./quake.js";
 import resources from "./resources.js";
 var rs = {
   images: ["test", "clown", "submarine"],
-  audio: ["test"]
+  audio: ["test"],
 };
 var g, game;
 platform.once("load", () => {
@@ -38,7 +38,7 @@ platform.once("load", () => {
     state,
     level,
     collision,
-    quake
+    quake,
   ]);
   g.resources.status.on("changed", () => {
     g.graphics.context.clearRect(0, 0, game.width, game.height);
@@ -74,14 +74,14 @@ function startGame(err) {
   }
 
   // Auto-refresh
-  (function() {
-    var timeout = setTimeout(function() {
+  (function () {
+    var timeout = setTimeout(function () {
       document.location.reload(true);
     }, 3000);
-    g.once("keydown", function() {
+    g.once("keydown", function () {
       disable();
     });
-    g.once("mousemove", function() {
+    g.once("mousemove", function () {
       disable();
     });
     g.chains.draw.unshift(draw);
@@ -99,12 +99,12 @@ function startGame(err) {
 
   // Camera
 
-  (function() {
+  (function () {
     game.camera = new Vector(0, 0);
 
     game.camera.zoom = 1;
 
-    game.camera.screenToWorld = function(screenV, out) {
+    game.camera.screenToWorld = function (screenV, out) {
       var ptm = getPixelsPerMeter();
       out.x = (screenV.x - game.width * 0.5) / ptm + game.camera.x;
       out.y = (screenV.y - game.height * 0.5) / ptm + game.camera.y;
@@ -126,7 +126,7 @@ function startGame(err) {
       return fraction / game.camera.zoom;
     }
 
-    game.camera.reset = function() {
+    game.camera.reset = function () {
       updateCamera();
       game.camera.x = 0;
       game.camera.y = 0;
@@ -181,7 +181,7 @@ function startGame(err) {
     function updateCamera() {}
 
     g.chains.update.push(
-      (g.chains.update.camera = function(dt, next) {
+      (g.chains.update.camera = function (dt, next) {
         next(dt);
         updateCamera();
       })
@@ -190,12 +190,62 @@ function startGame(err) {
     g.chains.draw.insertBefore(drawCamera, g.chains.draw.objects);
   })();
 
-  (function() {
+  // Touching
+  (function () {
+    g.objects.lists.touchable = g.objects.createIndexList("touchable");
+    g.chains.update.insertBefore(function (dt, next) {
+      next(dt);
+      g.objects.lists.touchable.each(function (ta) {
+        g.objects.lists.touchable.each(function (tb) {
+          detectTouch(ta, tb);
+        });
+        if (ta.touching) {
+          ta.touching.forEach(function (tb) {
+            detectTouch(ta, tb);
+          });
+        }
+      });
+    }, g.chains.update.objects);
+
+    function detectTouch(ta, tb) {
+      if (ta === tb) {
+        return;
+      }
+      var areTouching =
+        ta._objectmanager &&
+        tb._objectmanager &&
+        ta.position.distanceToV(tb.position) <= ta.touchRadius + tb.touchRadius;
+      handleTouch(ta, tb, areTouching);
+      handleTouch(tb, ta, areTouching);
+    }
+
+    function handleTouch(o, other, areTouching) {
+      if (!o.touching) {
+        o.touching = new Set();
+      }
+      var wereTouching = o.touching.has(other);
+      if (areTouching !== wereTouching) {
+        if (areTouching) {
+          o.touching.add(other);
+          if (o.touch) {
+            o.touch(other);
+          }
+        } else {
+          o.touching.delete(other);
+          if (o.untouch) {
+            o.untouch(other);
+          }
+        }
+      }
+    }
+  })();
+
+  (function () {
     game.chains.draw.push((g, next) => {
-      game.objects.lists.background.each(o => {
+      game.objects.lists.background.each((o) => {
         o.drawBackground(g);
       });
-      game.objects.lists.foreground.each(o => {
+      game.objects.lists.foreground.each((o) => {
         o.drawForeground(g);
       });
       next(g);
@@ -203,18 +253,11 @@ function startGame(err) {
   })();
 
   // Draw debug objects
-  game.chains.draw.push(function(g, next) {
+  game.chains.draw.push(function (g, next) {
     next(g);
-    game.objects.lists.foreground.each(o => {
-      if (o.child) {
-        g.strokeStyle("red");
-        g.strokeLine(
-          o.position.x,
-          o.position.y,
-          o.child.position.x,
-          o.child.position.y
-        );
-      }
+    game.objects.lists.touchable.each((o) => {
+      g.strokeStyle("red");
+      g.strokeCircle(o.position.x, o.position.y, o.touchRadius);
     });
   });
   // (function() {
@@ -247,7 +290,7 @@ function startGame(err) {
 
       player = new Player({
         x: this.position.x,
-        y: this.position.y
+        y: this.position.y,
       });
       game.objects.add(player);
       this.spawned = true;
@@ -261,9 +304,9 @@ function startGame(err) {
 
   _defineProperty(Start, "editorVisible", true);
 
-  (function() {
+  (function () {
     g.on("levelchanged", () => {
-      game.objects.objects.each(o => {
+      game.objects.objects.each((o) => {
         if (o.start) {
           o.start();
         }
@@ -279,6 +322,8 @@ function startGame(err) {
 
   class Player extends GameObject {
     sinkRate = 200;
+    touchable = true;
+    touchRadius = 150;
 
     constructor() {
       super({ x: 0, y: 0 });
@@ -306,6 +351,13 @@ function startGame(err) {
       this.position.x = mousePosition.x;
       this.position.y += dt * this.sinkRate;
     }
+
+    touch(other) {
+      console.log("touch");
+      if (other instanceof Fish) {
+        game.changeState(loseState());
+      }
+    }
   }
 
   function toRadians(angle) {
@@ -315,6 +367,8 @@ function startGame(err) {
   class Fish extends GameObject {
     updatable = true;
     foreground = true;
+    touchable = true;
+    touchRadius = 100;
     constructor({ x, y }) {
       super(...arguments);
       this.startPosition = { x: x, y: y };
@@ -373,8 +427,8 @@ function startGame(err) {
   }
 
   class ClownFish extends Fish {
-    constructor() {
-      super({ x: 0, y: 0 });
+    constructor(...args) {
+      super(...args);
       this.image = images["clown"];
       this.size = { width: 1, height: 1 };
     }
@@ -401,7 +455,7 @@ function startGame(err) {
   function editorState() {
     const me = {
       enable,
-      disable
+      disable,
     };
 
     function enable() {
@@ -442,11 +496,11 @@ function startGame(err) {
           ([item, x, y]) =>
             new item({
               x,
-              y
+              y,
             })
         ),
         clone: createLevel,
-        nextLevel: createLevel
+        nextLevel: createLevel,
       };
     }
 
@@ -464,7 +518,7 @@ function startGame(err) {
       game.objects.add(
         new item({
           x: p.x,
-          y: p.y
+          y: p.y,
         })
       );
     }
@@ -472,13 +526,13 @@ function startGame(err) {
     function deleteItem() {
       var p = getPosition();
       const obj = getCell(p.x, p.y);
-      obj.forEach(o => o.destroy());
+      obj.forEach((o) => o.destroy());
       leveldef = leveldef.filter(([_, x, y]) => x !== p.x || y !== p.y);
     }
 
     function load() {
       leveldef = [];
-      game.objects.lists.export.each(obj => {
+      game.objects.lists.export.each((obj) => {
         leveldef.push([obj.constructor, obj.position.x, obj.position.y]);
       });
     }
@@ -516,7 +570,7 @@ function startGame(err) {
 
     function draw(g, next) {
       next(g);
-      game.objects.lists.editorVisible.each(o => {
+      game.objects.lists.editorVisible.each((o) => {
         o.drawForeground(g);
       });
       const leftTop = new Vector();
@@ -552,9 +606,9 @@ function startGame(err) {
           {
             position: {
               x: p.x,
-              y: p.y
+              y: p.y,
             },
-            tile: item.tile
+            tile: item.tile,
           },
           g
         );
@@ -573,13 +627,15 @@ function startGame(err) {
     g.context.scale(scale, scale);
     g.drawCenteredImage(image, game.width / 2 / scale, game.height / 2 / scale);
     g.restore();
-  } //#states
+  }
+
+  //#states
 
   function gameplayState() {
     const me = {
       enabled: false,
       enable: enable,
-      disable: disable
+      disable: disable,
     };
 
     function enable() {
@@ -632,10 +688,45 @@ function startGame(err) {
   function level_sym1() {
     return {
       name: "Test",
-      objects: [new Start({ x: 0, y: 0 }), new ClownFish({ x: 0, y: 0 })],
+      objects: [new Start({ x: 0, y: 0 }), new ClownFish({ x: 0, y: 500 })],
       clone: level_sym1,
-      nextLevel: null
+      nextLevel: null,
     };
+  }
+
+  function loseState() {
+    const me = {
+      enabled: false,
+      enable: enable,
+      disable: disable,
+    };
+
+    function enable() {
+      g.chains.draw.unshift(draw);
+      g.chains.update.unshift(update);
+      g.on("keydown", keydown);
+    }
+
+    function disable() {
+      g.chains.draw.remove(draw);
+      g.chains.update.remove(update);
+      g.removeListener("keydown", keydown);
+    }
+
+    function draw(g, next) {
+      next(g);
+      g.fillStyle("black");
+      g.fillText("You killed a fish", game.width * 0.5, game.height * 0.5);
+    }
+
+    function update(dt, next) {}
+
+    function keydown() {
+      g.restartLevel();
+      g.changeState(gameplayState());
+    }
+
+    return me;
   }
 
   var player = new Player();
