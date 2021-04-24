@@ -25,7 +25,7 @@ import keyboard from "./keyboard.js";
 import quake from "./quake.js";
 import resources from "./resources.js";
 var rs = {
-  images: ["test", "clown", "submarine"],
+  images: ["test", "clown", "submarine", "octopus_0", "octopus_1", "octopus_2"],
   audio: ["test"],
 };
 var g, game;
@@ -364,71 +364,72 @@ function startGame(err) {
     return angle * (Math.PI / 180);
   }
 
+  class Boundaries {
+    constructor(top, right, bottom, left) {
+      this.top = top;
+      this.right = right;
+      this.bottom = bottom;
+      this.left = left;
+      if (top > 0) {
+        console.error("top should be negative of zero");
+      }
+      if (left > 0) {
+        console.error("top should be negative of zero");
+      }
+      if (bottom < 0) {
+        console.error("top should be positive of zero");
+      }
+      if (right < 0) {
+        console.error("right should be positive of zero");
+      }
+    }
+  }
   class Fish extends GameObject {
     updatable = true;
     foreground = true;
     touchable = true;
     touchRadius = 100;
-    constructor({ x, y }) {
+
+    constructor(x, y, angle, speed) {
       super(...arguments);
-      this.startPosition = { x: x, y: y };
-      this.relativePosition = { x: 0, y: 0 };
+      this.startPosition = new Vector(x, y);
+      this.relativePosition = new Vector(0, 0);
       this.image = images["fish"];
       this.size = { width: 1, height: 1 };
-      this.angle = 180; // With real degree stuff
-      this.boundaries = { left: 500, right: 500, top: 0, bottom: 0 };
-      this.speed = 400;
+      this.boundaries = new Boundaries(0, 500, 0, -500);
+      this.velocity = this.angleAndSpeedtoVector(angle, speed);
     }
+
+    angleAndSpeedtoVector(angle, speed) {
+      let y = Math.sin(toRadians(angle)) * speed;
+      let x = Math.cos(toRadians(angle)) * speed;
+      return new Vector(x, y);
+    }
+
     update(dt) {
-      this.relativePosition.x +=
-        dt * this.speed * Math.cos(toRadians(this.angle));
-      this.relativePosition.y +=
-        Math.sin(toRadians(this.angle)) * dt * this.speed;
+      let velocity = this.velocity.clone();
+      this.relativePosition.addV(velocity.multiply(dt));
 
       if (
-        this.startPosition.x + this.boundaries.right <
-        this.relativePosition.x
+        this.relativePosition.x > this.boundaries.right ||
+        this.relativePosition.x < this.boundaries.left
       ) {
-        this.angle = 180;
-        this.relativePosition.x +=
-          this.startPosition.x +
-          this.boundaries.right -
-          this.relativePosition.x;
-      } else if (
-        this.startPosition.x - this.boundaries.left >
-        this.relativePosition.x
-      ) {
-        this.angle = 0;
-        this.relativePosition.x +=
-          this.startPosition.x - this.boundaries.left - this.relativePosition.x;
+        this.velocity.x *= -1;
       }
-
-      // if (this.startPosition.y - this.boundaries.top > this.relativePosition.y) {
-      //   this.angle = -this.angle;
-
-      //   // TOOD: hier moeten we flippen naar links en movement omdraaien
-      // } else if (this.startPosition.x + this.boundaries.bottom < this.relativePosition.y) {
-      //   this.angle = -this.angle;
-
-      //   // TODO: Flip angle en restant movement
-      // }
-      this.position = new Vector(
-        this.startPosition.x + this.relativePosition.x,
-        this.startPosition.y + this.relativePosition.y
-      );
+      this.position = this.startPosition.clone().addV(this.relativePosition);
     }
     drawForeground(g) {
       g.save();
       g.context.translate(this.position.x, this.position.y);
-      g.context.scale(this.angle === 0 ? -1 : 1, 1);
+      g.context.scale(this.velocity.x < 0 ? 1 : -1, 1);
       g.drawCenteredImage(this.image, 0, 0);
       g.restore();
     }
   }
 
   class ClownFish extends Fish {
-    constructor(...args) {
-      super(...args);
+    constructor() {
+      super(0, 0, 180, 400);
       this.image = images["clown"];
       this.size = { width: 1, height: 1 };
     }
@@ -439,6 +440,43 @@ function startGame(err) {
       super({ x: 10, y: 5 });
       this.image = images["football"];
       this.size = { width: 2, height: 2 };
+    }
+  }
+
+  class Octopus extends Fish {
+    constructor() {
+      super(10, 5, 15, 300);
+      this.image = images["octopus_0"];
+      this.size = { width: 1, height: 1 };
+      this.boundaries = new Boundaries(-200, 200, 200, -200);
+      this.frame = 0;
+    }
+    update(dt) {
+      this.frame += dt * 2;
+      this.image = images[`octopus_${Math.round(this.frame) % 3}`];
+      let velocity = this.velocity.clone();
+      this.relativePosition.addV(velocity.multiply(dt));
+
+      if (
+        this.relativePosition.x > this.boundaries.right ||
+        this.relativePosition.x < this.boundaries.left
+      ) {
+        this.velocity.x *= -1;
+      }
+      if (
+        this.relativePosition.y < this.boundaries.top ||
+        this.relativePosition.y > this.boundaries.bottom
+      ) {
+        this.velocity.y *= -1;
+      }
+      this.position = this.startPosition.clone().addV(this.relativePosition);
+    }
+    drawForeground(g) {
+      g.save();
+      g.context.translate(this.position.x, this.position.y);
+      g.context.scale(this.velocity.x < 0 ? -1 : 1, 1);
+      g.drawCenteredImage(this.image, 0, 0);
+      g.restore();
     }
   }
 
@@ -686,7 +724,11 @@ function startGame(err) {
   function level_sym1() {
     return {
       name: "Test",
-      objects: [new Start({ x: 0, y: 0 }), new ClownFish({ x: 0, y: 500 })],
+      objects: [
+        new Start({ x: 0, y: 0 }),
+        new ClownFish({ x: 0, y: 500 }),
+        new Octopus(),
+      ],
       clone: level_sym1,
       nextLevel: null,
     };
