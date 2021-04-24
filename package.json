@@ -1,20 +1,25 @@
 {
+  "name": "ld48",
+  "description": "A game for Ludum Dare 48",
+  "version": "1.0.0",
+  "main": "main.js",
+  "devDependencies": {
+    "esbuild": "^0.11.13",
+    "prettier": "^2.2.1"
+  },
   "scripts": {
     "prettier": "prettier --write ./**/*.{html,js,css}",
     "start": "esbuild main.js --serve --servedir=. --sourcemap",
     "build": "esbuild main.js --minify --bundle --sourcemap"
   },
-  "devDependencies": {
-    "@babel/cli": "^7.6.2",
-    "@babel/core": "^7.6.2",
-    "@babel/plugin-proposal-class-properties": "^7.5.5",
-    "amd-to-es6": "^0.2.0",
-    "eslint": "^6.5.1",
-    "eslint-config-prettier": "^6.4.0",
-    "eslint-plugin-prettier": "^3.1.1",
-    "prettier": "^1.19.1"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bobvanderlinden/ld48.git"
   },
-  "dependencies": {
-    "esbuild": "^0.11.13"
-  }
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bobvanderlinden/ld48/issues"
+  },
+  "homepage": "https://github.com/bobvanderlinden/ld48#readme"
 }
