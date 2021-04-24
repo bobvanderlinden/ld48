@@ -6,7 +6,7 @@ function _defineProperty(obj, key, value) {
       value: value,
       enumerable: true,
       configurable: true,
-      writable: true,
+      writable: true
     });
   } else {
     obj[key] = value;
@@ -26,7 +26,7 @@ import quake from "./quake.js";
 import resources from "./resources.js";
 var rs = {
   images: ["test"],
-  audio: ["test"],
+  audio: ["test"]
 };
 var g, game;
 platform.once("load", () => {
@@ -38,7 +38,7 @@ platform.once("load", () => {
     state,
     level,
     collision,
-    quake,
+    quake
   ]);
   g.resources.status.on("changed", () => {
     g.graphics.context.clearRect(0, 0, game.width, game.height);
@@ -103,7 +103,6 @@ function startGame(err) {
     game.camera = new Vector(0, 0);
 
     game.camera.zoom = 1;
-    game.camera.PTM = 1;
 
     game.camera.screenToWorld = function(screenV, out) {
       var ptm = getPixelsPerMeter();
@@ -120,18 +119,17 @@ function startGame(err) {
     game.camera.getPixelsPerMeter = getPixelsPerMeter;
 
     function getPixelsPerMeter() {
-      return game.camera.PTM / game.camera.zoom;
+      const worldWidth = 1024;
+      const screenWidth = game.width;
+      const fraction = screenWidth / worldWidth;
+      return fraction / game.camera.zoom;
     }
 
     game.camera.reset = function() {
       updateCamera();
-      game.camera.x = game.camera.targetx;
-      game.camera.y = game.camera.targety;
-      game.camera.smoothx = game.camera.x;
-      game.camera.smoothy = game.camera.y;
+      game.camera.x = 0;
+      game.camera.y = 0;
     };
-
-    var pattern;
 
     function drawCamera(g, next) {
       var ptm = getPixelsPerMeter();
@@ -140,33 +138,36 @@ function startGame(err) {
       // if (!pattern) {
       //   pattern = g.context.createPattern(images.background, "repeat");
       // }
-      g.fillStyle("white");
-      g.fillRectangle(game.camera.x, game.camera.y, game.width, game.height);
+      g.fillStyle("gray");
+      g.fillRectangle(0, 0, game.width, game.height);
 
-      g.save();
-      g.context.translate(-game.camera.x * ptm, game.camera.y * ptm);
-      g.fillStyle(pattern);
-      g.fillRectangle(
-        game.camera.x * ptm,
-        -game.camera.y * ptm,
-        game.width,
-        game.height
-      );
-      g.restore();
+      // g.save();
+      // g.context.translate(-game.camera.x * ptm, game.camera.y * ptm);
+      // g.fillStyle(pattern);
+      // g.fillRectangle(
+      //   game.camera.x * ptm,
+      //   -game.camera.y * ptm,
+      //   game.width,
+      //   game.height
+      // );
+      // g.restore();
 
       // Transform viewport to match camera.
       g.save();
       g.context.scale(ptm, ptm);
       g.context.lineWidth /= ptm;
-      g.context.translate(-game.camera.x, game.camera.y);
+      g.context.translate((game.width / ptm) * 0.5, (game.height / ptm) * 0.5);
+
+      g.context.translate(game.camera.x, -game.camera.y);
+
+      g.strokeStyle("green");
+      g.strokeRectangle(-512, 0, 1024, 1024);
+
       next(g);
       g.restore();
     }
 
-    function updateCamera() {
-      game.camera.x = -(game.width * 0.5) / getPixelsPerMeter();
-      game.camera.y = (game.height * 0.5) / getPixelsPerMeter();
-    }
+    function updateCamera() {}
 
     g.chains.update.push(
       (g.chains.update.camera = function(dt, next) {
@@ -180,10 +181,10 @@ function startGame(err) {
 
   (function() {
     game.chains.draw.push((g, next) => {
-      game.objects.lists.background.each((o) => {
+      game.objects.lists.background.each(o => {
         o.drawBackground(g);
       });
-      game.objects.lists.foreground.each((o) => {
+      game.objects.lists.foreground.each(o => {
         o.drawForeground(g);
       });
       next(g);
@@ -193,7 +194,7 @@ function startGame(err) {
   // Draw debug objects
   game.chains.draw.push(function(g, next) {
     next(g);
-    game.objects.lists.foreground.each((o) => {
+    game.objects.lists.foreground.each(o => {
       if (o.child) {
         g.strokeStyle("red");
         g.strokeLine(
@@ -235,7 +236,7 @@ function startGame(err) {
 
       player = new Player({
         x: this.position.x,
-        y: this.position.y,
+        y: this.position.y
       });
       game.objects.add(player);
       this.spawned = true;
@@ -251,7 +252,7 @@ function startGame(err) {
 
   (function() {
     g.on("levelchanged", () => {
-      game.objects.objects.each((o) => {
+      game.objects.objects.each(o => {
         if (o.start) {
           o.start();
         }
@@ -266,6 +267,8 @@ function startGame(err) {
   }
 
   class Player extends GameObject {
+    sinkRate = 200;
+
     constructor() {
       super({ x: 0, y: 0 });
       this.image = images["test"];
@@ -284,6 +287,7 @@ function startGame(err) {
       game.camera.screenToWorld(game.mouse, mousePosition);
 
       this.position.x = mousePosition.x;
+      this.position.y += dt * this.sinkRate;
     }
   }
 
@@ -327,7 +331,7 @@ function startGame(err) {
   function editorState() {
     const me = {
       enable,
-      disable,
+      disable
     };
 
     function enable() {
@@ -368,11 +372,11 @@ function startGame(err) {
           ([item, x, y]) =>
             new item({
               x,
-              y,
+              y
             })
         ),
         clone: createLevel,
-        nextLevel: createLevel,
+        nextLevel: createLevel
       };
     }
 
@@ -390,7 +394,7 @@ function startGame(err) {
       game.objects.add(
         new item({
           x: p.x,
-          y: p.y,
+          y: p.y
         })
       );
     }
@@ -398,13 +402,13 @@ function startGame(err) {
     function deleteItem() {
       var p = getPosition();
       const obj = getCell(p.x, p.y);
-      obj.forEach((o) => o.destroy());
+      obj.forEach(o => o.destroy());
       leveldef = leveldef.filter(([_, x, y]) => x !== p.x || y !== p.y);
     }
 
     function load() {
       leveldef = [];
-      game.objects.lists.export.each((obj) => {
+      game.objects.lists.export.each(obj => {
         leveldef.push([obj.constructor, obj.position.x, obj.position.y]);
       });
     }
@@ -442,7 +446,7 @@ function startGame(err) {
 
     function draw(g, next) {
       next(g);
-      game.objects.lists.editorVisible.each((o) => {
+      game.objects.lists.editorVisible.each(o => {
         o.drawForeground(g);
       });
       const leftTop = new Vector();
@@ -478,9 +482,9 @@ function startGame(err) {
           {
             position: {
               x: p.x,
-              y: p.y,
+              y: p.y
             },
-            tile: item.tile,
+            tile: item.tile
           },
           g
         );
@@ -505,17 +509,19 @@ function startGame(err) {
     const me = {
       enabled: false,
       enable: enable,
-      disable: disable,
+      disable: disable
     };
 
     function enable() {
       game.camera.reset();
       g.chains.draw.unshift(draw);
+      g.chains.update.push(update);
       g.on("keydown", keydown);
     }
 
     function disable() {
       g.chains.draw.remove(draw);
+      g.chains.update.remove(update);
       g.removeListener("keydown", keydown);
     }
 
@@ -541,6 +547,10 @@ function startGame(err) {
       player.movement = movement;
     }
 
+    function update(dt) {
+      game.camera.y = player.position.y;
+    }
+
     function draw(g, next) {
       // Draw HUD
       next(g);
@@ -554,7 +564,7 @@ function startGame(err) {
       name: "Test",
       objects: [new Start({ x: 0, y: 0 })],
       clone: level_sym1,
-      nextLevel: null,
+      nextLevel: null
     };
   }
 
