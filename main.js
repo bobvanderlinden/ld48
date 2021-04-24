@@ -71,7 +71,9 @@ function startGame(err) {
 
   function pickRandom(arr) {
     return arr[(arr.length * Math.random()) | 0];
-  } // Auto-refresh
+  }
+
+  // Auto-refresh
   (function() {
     var timeout = setTimeout(function() {
       document.location.reload(true);
@@ -84,7 +86,6 @@ function startGame(err) {
     });
     g.chains.draw.unshift(draw);
     function draw(g, next) {
-      // console.log(game.chains.draw.slice(0));
       g.fillStyle("#ff0000");
       g.fillCircle(game.width, 0, 30);
       g.fillStyle("black");
@@ -95,12 +96,13 @@ function startGame(err) {
       g.chains.draw.remove(draw);
     }
   })();
+
   // Camera
 
   (function() {
     game.camera = new Vector(0, 0);
 
-    game.camera.zoom = 8;
+    game.camera.zoom = 1;
     game.camera.PTM = 512;
     game.camera.x = -(game.width * 0.5) / getPixelsPerMeter();
     game.camera.y = (game.height * 0.5) / getPixelsPerMeter();
@@ -136,11 +138,14 @@ function startGame(err) {
     var pattern;
 
     function drawCamera(g, next) {
-      var ptm = getPixelsPerMeter(); // Draw background.
+      var ptm = getPixelsPerMeter();
 
+      // Draw background.
       // if (!pattern) {
       //   pattern = g.context.createPattern(images.background, "repeat");
       // }
+      g.fillStyle("white");
+      g.fillRectangle(game.camera.x, game.camera.y, game.width, game.height);
 
       g.save();
       g.context.translate(-game.camera.x * ptm, game.camera.y * ptm);
@@ -151,8 +156,9 @@ function startGame(err) {
         game.width,
         game.height
       );
-      g.restore(); // Transform viewport to match camera.
+      g.restore();
 
+      // Transform viewport to match camera.
       g.save();
       g.context.scale(ptm, ptm);
       g.context.lineWidth /= ptm;
@@ -196,21 +202,33 @@ function startGame(err) {
     g.chains.draw.insertBefore(drawCamera, g.chains.draw.objects);
   })(); // Draw objects
 
+  (function() {
+    game.chains.draw.push((g, next) => {
+      game.objects.lists.background.each((o) => {
+        o.drawBackground(g);
+      });
+      game.objects.lists.foreground.each((o) => {
+        o.drawForeground(g);
+      });
+      next(g);
+    });
+  })();
+
   // Draw debug objects
-  // game.chains.draw.push(function(g, next) {
-  //   next(g);
-  //   game.objects.lists.foreground.each(o => {
-  //     if (o.child) {
-  //       g.strokeStyle("red");
-  //       g.strokeLine(
-  //         o.position.x,
-  //         o.position.y,
-  //         o.child.position.x,
-  //         o.child.position.y
-  //       );
-  //     }
-  //   });
-  // });
+  game.chains.draw.push(function(g, next) {
+    next(g);
+    game.objects.lists.foreground.each((o) => {
+      if (o.child) {
+        g.strokeStyle("red");
+        g.strokeLine(
+          o.position.x,
+          o.position.y,
+          o.child.position.x,
+          o.child.position.y
+        );
+      }
+    });
+  });
   // (function() {
   //   game.chains.draw.insertAfter(function(g, next) {
   //     next(g);
@@ -218,63 +236,14 @@ function startGame(err) {
   //       g.strokeStyle("red");
   //       g.strokeCircle(o.position.x, o.position.y, o.touchRadius || 10);
   //     });
-  //     for(let y=-10;y<10;y++) {
-  //       for(let x=-10;x<10;x++) {
+  //     for (let y = -10; y < 10; y++) {
+  //       for (let x = -10; x < 10; x++) {
   //         g.strokeCircle(x, y, 0.5);
   //       }
   //     }
   //   }, game.chains.draw.camera);
   // })();
   //#gameobjects
-
-  let grid = {};
-
-  function getCell(x, y) {
-    return grid[`${x}x${y}`];
-  }
-
-  function getCellOf(x, y, type) {
-    const cell = getCell(x, y);
-
-    if (!cell) {
-      return;
-    }
-
-    return [...cell].filter((c) => c instanceof type)[0];
-  }
-
-  function hasCell(x, y, type) {
-    const cell = getCell(x, y);
-
-    if (!cell) {
-      return;
-    }
-
-    return [...cell].some((c) => c instanceof type);
-  }
-
-  function addToCell(x, y, value) {
-    if (!grid[`${x}x${y}`]) {
-      grid[`${x}x${y}`] = new Set();
-    }
-
-    grid[`${x}x${y}`].add(value);
-  }
-
-  function removeFromCell(x, y, value) {
-    grid[`${x}x${y}`].delete(value);
-
-    if (grid[`${x}x${y}`].size === 0) {
-      delete grid[`${x}x${y}`];
-    }
-  }
-
-  g.objects.lists.cell.listeners.added.push((cell) => {
-    cell.addToGrid();
-  });
-  g.objects.lists.cell.listeners.removed.push((cell) => {
-    cell.removeFromGrid();
-  });
 
   // Player
 
@@ -292,7 +261,6 @@ function startGame(err) {
       player = new Player({
         x: this.position.x,
         y: this.position.y,
-        tile: images["snake/head"],
       });
       game.objects.add(player);
       this.spawned = true;
@@ -327,9 +295,11 @@ function startGame(err) {
       super({ x: 0, y: 0 });
       this.image = images["test"];
       this.velocity = new Vector(0, 0);
+      this.foreground = true;
     }
 
     drawForeground(g) {
+      console.log("kkoek");
       g.save();
       g.context.translate(this.position.x, this.position.y);
       g.drawCenteredImage(this.image, 0, 0);

@@ -8,7 +8,7 @@ function chain(fs, next) {
       var fargs = [
         function() {
           return call(i + 1, arguments);
-        }
+        },
       ];
       Array.prototype.unshift.apply(fargs, args);
       return f.apply(null, fargs);
@@ -28,12 +28,12 @@ function Game(start, canvas, components) {
   this.objects.lists.draw = this.objects.createIndexList("drawable");
   this.chains = {
     draw: [],
-    update: []
+    update: [],
   };
 
   this.chains.draw.push(
     (this.chains.draw.objects = function(g, next) {
-      me.objects.lists.draw.each(o => {
+      me.objects.lists.draw.each((o) => {
         o.draw(g);
       });
       next(g);
@@ -42,7 +42,7 @@ function Game(start, canvas, components) {
 
   this.chains.update.push(
     (this.chains.update.objects = function updateObjects(dt, next) {
-      me.objects.lists.update.each(o => {
+      me.objects.lists.update.each((o) => {
         o.update(dt);
       });
       me.objects.handlePending();
@@ -55,7 +55,7 @@ function Game(start, canvas, components) {
   this.time = 0;
 
   var componentsLoaded = 0;
-  components.forEach(c => {
+  components.forEach((c) => {
     var result = c(me, componentLoaded);
     if (result !== componentLoaded) {
       componentLoaded();
@@ -75,12 +75,12 @@ eventemitter._inherit(p);
 Object.defineProperty(p, "width", {
   get: function() {
     return this.canvas.width;
-  }
+  },
 });
 Object.defineProperty(p, "height", {
   get: function() {
     return this.canvas.height;
-  }
+  },
 });
 
 p.start = function() {
@@ -115,7 +115,7 @@ p.start = function() {
     lastUpdate = now;
     dt = 1 / 60; //Math.min(1/30,dt);
 
-    chain(me.chains.update, dt => {})(dt);
+    chain(me.chains.update, (dt) => {})(dt);
 
     me.time += dt;
 
@@ -124,7 +124,7 @@ p.start = function() {
 
     me.graphics.clear();
 
-    chain(me.chains.draw, g => {})(me.graphics);
+    chain(me.chains.draw, (g) => {})(me.graphics);
 
     if (me.running === runningToken) {
       requestAnimationFrame(update);
