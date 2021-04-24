@@ -284,15 +284,24 @@ function startGame(err) {
       super({ x: 0, y: 0 });
       this.image = images["submarine"];
       this.velocity = new Vector(0, 0);
+      this.flipped = false;
     }
 
     drawForeground(g) {
-      g.drawCenteredImage(this.image, this.position.x, this.position.y);
+      g.save();
+      g.context.translate(this.position.x, this.position.y);
+      g.context.scale(this.flipped ? -1 : 1, 1);
+      g.drawCenteredImage(this.image, 0, 0);
+      g.restore();
     }
 
     update(dt) {
       const mousePosition = new Vector(0, 0);
       game.camera.screenToWorld(game.mouse, mousePosition);
+
+      if (this.position.x !== mousePosition.x) {
+        this.flipped = this.position.x > mousePosition.x;
+      }
 
       this.position.x = mousePosition.x;
       this.position.y += dt * this.sinkRate;
