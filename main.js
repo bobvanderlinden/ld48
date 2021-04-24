@@ -25,8 +25,16 @@ import keyboard from "./keyboard.js";
 import quake from "./quake.js";
 import resources from "./resources.js";
 var rs = {
-  images: ["test", "clown", "submarine", "octopus_0", "octopus_1", "octopus_2"],
   audio: ["test"],
+  images: [
+    "test",
+    "clown",
+    "submarine",
+    "octopus_0",
+    "octopus_1",
+    "octopus_2",
+    "football"
+  ],
 };
 var g, game;
 platform.once("load", () => {
@@ -437,9 +445,41 @@ function startGame(err) {
 
   class FootballFish extends Fish {
     constructor() {
-      super({ x: 10, y: 5 });
+      super(15, 20, 45, 200);
       this.image = images["football"];
       this.size = { width: 2, height: 2 };
+      this.boundaries = new Boundaries(-100, 800, 100, -800);
+    }
+    update(dt) {
+      let velocity = this.velocity.clone();
+      this.relativePosition.addV(velocity.multiply(dt));
+
+      if (
+        this.relativePosition.x > this.boundaries.right ||
+        this.relativePosition.x < this.boundaries.left
+      ) {
+        this.velocity.x *= -1;
+      }
+      if (
+        this.relativePosition.y < this.boundaries.top ||
+        this.relativePosition.y > this.boundaries.bottom
+      ) {
+        this.velocity.y *= -1;
+      }
+      this.position = this.startPosition.clone().addV(this.relativePosition);
+    }
+    drawForeground(g) {
+      g.save();
+      g.context.translate(this.position.x, this.position.y);
+      g.context.scale(this.velocity.x < 0 ? 1 : -1, 1);
+      console.log(this.velocity.angle());
+      g.context.rotate(
+        this.velocity.x < 0
+          ? this.velocity.angle() + Math.PI
+          : this.velocity.angle() * -1
+      );
+      g.drawCenteredImage(this.image, 0, 0);
+      g.restore();
     }
   }
 
@@ -728,6 +768,7 @@ function startGame(err) {
         new Start({ x: 0, y: 0 }),
         new ClownFish({ x: 0, y: 500 }),
         new Octopus(),
+        new FootballFish()
       ],
       clone: level_sym1,
       nextLevel: null,
