@@ -106,15 +106,16 @@ function startGame(err) {
 
     game.camera.screenToWorld = function(screenV, out) {
       var ptm = getPixelsPerMeter();
-      out.x = screenV.x / ptm + game.camera.x;
-      out.y = screenV.y / ptm - game.camera.y;
+      out.x = (screenV.x - game.width * 0.5) / ptm + game.camera.x;
+      out.y = (screenV.y - game.height * 0.5) / ptm + game.camera.y;
     };
 
-    game.camera.worldToScreen = function(worldV, out) {
-      var ptm = getPixelsPerMeter();
-      out.x = (worldV.x - game.camera.x) * ptm;
-      out.y = (worldV.y - game.camera.y) * ptm * -1;
-    };
+    // Broken:
+    // game.camera.worldToScreen = function(worldV, out) {
+    //   var ptm = getPixelsPerMeter();
+    //   out.x = (worldV.x - game.camera.x) * ptm;
+    //   out.y = (worldV.y - game.camera.y) * ptm * -1;
+    // };
 
     game.camera.getPixelsPerMeter = getPixelsPerMeter;
 
@@ -152,6 +153,11 @@ function startGame(err) {
       // );
       // g.restore();
 
+      // const debugPosition = game.mouse;
+
+      // g.strokeStyle("yellow");
+      // g.strokeCircle(debugPosition.x, debugPosition.y, 10);
+
       // Transform viewport to match camera.
       g.save();
       g.context.scale(ptm, ptm);
@@ -162,6 +168,11 @@ function startGame(err) {
 
       g.strokeStyle("green");
       g.strokeRectangle(-512, 0, 1024, 1024);
+
+      // const a = new Vector(0, 0);
+      // game.camera.screenToWorld(debugPosition, a);
+      // g.fillStyle("green");
+      // g.fillCircle(a.x, a.y, 20);
 
       next(g);
       g.restore();
@@ -276,10 +287,7 @@ function startGame(err) {
     }
 
     drawForeground(g) {
-      g.save();
-      g.context.translate(this.position.x, this.position.y);
-      g.drawCenteredImage(this.image, 0, 0);
-      g.restore();
+      g.drawCenteredImage(this.image, this.position.x, this.position.y);
     }
 
     update(dt) {
