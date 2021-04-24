@@ -6,7 +6,7 @@ function _defineProperty(obj, key, value) {
       value: value,
       enumerable: true,
       configurable: true,
-      writable: true,
+      writable: true
     });
   } else {
     obj[key] = value;
@@ -25,8 +25,8 @@ import keyboard from "./keyboard.js";
 import quake from "./quake.js";
 import resources from "./resources.js";
 var rs = {
-  images: ["test"],
-  audio: ["test"],
+  images: ["test", "clown"],
+  audio: ["test"]
 };
 var g, game;
 platform.once("load", () => {
@@ -38,7 +38,7 @@ platform.once("load", () => {
     state,
     level,
     collision,
-    quake,
+    quake
   ]);
   g.resources.status.on("changed", () => {
     g.graphics.context.clearRect(0, 0, game.width, game.height);
@@ -180,10 +180,10 @@ function startGame(err) {
 
   (function() {
     game.chains.draw.push((g, next) => {
-      game.objects.lists.background.each((o) => {
+      game.objects.lists.background.each(o => {
         o.drawBackground(g);
       });
-      game.objects.lists.foreground.each((o) => {
+      game.objects.lists.foreground.each(o => {
         o.drawForeground(g);
       });
       next(g);
@@ -193,7 +193,7 @@ function startGame(err) {
   // Draw debug objects
   game.chains.draw.push(function(g, next) {
     next(g);
-    game.objects.lists.foreground.each((o) => {
+    game.objects.lists.foreground.each(o => {
       if (o.child) {
         g.strokeStyle("red");
         g.strokeLine(
@@ -235,7 +235,7 @@ function startGame(err) {
 
       player = new Player({
         x: this.position.x,
-        y: this.position.y,
+        y: this.position.y
       });
       game.objects.add(player);
       this.spawned = true;
@@ -251,7 +251,7 @@ function startGame(err) {
 
   (function() {
     g.on("levelchanged", () => {
-      game.objects.objects.each((o) => {
+      game.objects.objects.each(o => {
         if (o.start) {
           o.start();
         }
@@ -287,20 +287,73 @@ function startGame(err) {
     }
   }
 
+  function toRadians(angle) {
+    return angle * (Math.PI / 180);
+  }
+
   class Fish extends GameObject {
-    constructor() {
-      super({ x: 0, y: 0 });
+    updatable = true;
+    foreground = true;
+    constructor({ x, y }) {
+      super(...arguments);
+      this.startPosition = { x: x, y: y };
+      this.relativePosition = { x: 0, y: 0 };
       this.image = images["fish"];
       this.size = { width: 1, height: 1 };
+      this.angle = 90; // We use compas 0 is North E 90 S 180 W270, 90 is default to the right
+      this.boundaries = { left: 50, right: 50, top: 0, bottom: 0 };
+      this.speed = 10;
     }
-    move() {
-      this.position = { x: this.position.x + 1, y: this.position.y };
+    update(dt) {
+      this.relativePosition.x +=
+        dt * this.speed * Math.cos(toRadians(this.angle));
+      this.relativePosition.y +=
+        Math.sin(toRadians(this.angle)) * dt * this.speed;
+
+      if (
+        this.startPosition.x + this.boundaries.right <
+        this.relativePosition.x
+      ) {
+        this.angle = -this.angle;
+        this.relativePosition.x +=
+          this.startPosition.x +
+          this.boundaries.right -
+          this.relativePosition.x;
+      } else if (
+        this.startPosition.x - this.boundaries.left >
+        this.relativePosition.x
+      ) {
+        this.angle = -this.angle;
+        this.relativePosition.x +=
+          this.relativePosition.x +
+          (this.startPosition.x - this.boundaries.left);
+      }
+
+      // if (this.startPosition.y - this.boundaries.top > this.relativePosition.y) {
+      //   this.angle = -this.angle;
+
+      //   // TOOD: hier moeten we flippen naar links en movement omdraaien
+      // } else if (this.startPosition.x + this.boundaries.bottom < this.relativePosition.y) {
+      //   this.angle = -this.angle;
+
+      //   // TODO: Flip angle en restant movement
+      // }
+      this.position = {
+        x: this.startPosition.x + this.relativePosition.x,
+        y: this.startPosition.y + this.relativePosition.y
+      };
+    }
+    drawForeground(g) {
+      g.save();
+      g.context.translate(this.position.x, this.position.y);
+      g.drawCenteredImage(this.image, 0, 0);
+      g.restore();
     }
   }
 
   class ClownFish extends Fish {
     constructor() {
-      super({ x: 15, y: 10 });
+      super({ x: 0, y: 0 });
       this.image = images["clown"];
       this.size = { width: 1, height: 1 };
     }
@@ -327,7 +380,7 @@ function startGame(err) {
   function editorState() {
     const me = {
       enable,
-      disable,
+      disable
     };
 
     function enable() {
@@ -368,11 +421,11 @@ function startGame(err) {
           ([item, x, y]) =>
             new item({
               x,
-              y,
+              y
             })
         ),
         clone: createLevel,
-        nextLevel: createLevel,
+        nextLevel: createLevel
       };
     }
 
@@ -390,7 +443,7 @@ function startGame(err) {
       game.objects.add(
         new item({
           x: p.x,
-          y: p.y,
+          y: p.y
         })
       );
     }
@@ -398,13 +451,13 @@ function startGame(err) {
     function deleteItem() {
       var p = getPosition();
       const obj = getCell(p.x, p.y);
-      obj.forEach((o) => o.destroy());
+      obj.forEach(o => o.destroy());
       leveldef = leveldef.filter(([_, x, y]) => x !== p.x || y !== p.y);
     }
 
     function load() {
       leveldef = [];
-      game.objects.lists.export.each((obj) => {
+      game.objects.lists.export.each(obj => {
         leveldef.push([obj.constructor, obj.position.x, obj.position.y]);
       });
     }
@@ -442,7 +495,7 @@ function startGame(err) {
 
     function draw(g, next) {
       next(g);
-      game.objects.lists.editorVisible.each((o) => {
+      game.objects.lists.editorVisible.each(o => {
         o.drawForeground(g);
       });
       const leftTop = new Vector();
@@ -478,9 +531,9 @@ function startGame(err) {
           {
             position: {
               x: p.x,
-              y: p.y,
+              y: p.y
             },
-            tile: item.tile,
+            tile: item.tile
           },
           g
         );
@@ -505,7 +558,7 @@ function startGame(err) {
     const me = {
       enabled: false,
       enable: enable,
-      disable: disable,
+      disable: disable
     };
 
     function enable() {
@@ -552,9 +605,9 @@ function startGame(err) {
   function level_sym1() {
     return {
       name: "Test",
-      objects: [new Start({ x: 0, y: 0 })],
+      objects: [new Start({ x: 0, y: 0 }), new ClownFish({ x: 0, y: 0 })],
       clone: level_sym1,
-      nextLevel: null,
+      nextLevel: null
     };
   }
 
