@@ -1,15 +1,5 @@
-.embedded {
-  display: none;
-}
-
 * {
   box-sizing: border-box;
-}
-
-#container {
-  height: 90vh;
-  max-width: 70vh;
-  overflow: hidden;
 }
 
 body {
@@ -26,4 +16,22 @@ body {
   background-size: cover;
   height: 100vh;
 }
+
+[style*="--aspect-ratio"] {
+  position: relative;
+  width: calc(90vh * (var(--aspect-ratio)));
+}
+
+[style*="--aspect-ratio"]::before {
+  content: "";
+  display: block;
+  padding-bottom: calc(100% / (var(--aspect-ratio)));
+}
+
+[style*="--aspect-ratio"] > :first-child {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
