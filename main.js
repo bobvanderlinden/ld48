@@ -119,7 +119,7 @@ function startGame(err) {
     game.camera.getPixelsPerMeter = getPixelsPerMeter;
 
     function getPixelsPerMeter() {
-      const worldWidth = 1024;
+      const worldWidth = 2048;
       const screenWidth = game.width;
       const fraction = screenWidth / worldWidth;
       return fraction / game.camera.zoom;
