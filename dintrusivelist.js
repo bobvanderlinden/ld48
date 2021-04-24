@@ -8,11 +8,11 @@ function DIntrusiveList(name) {
   this._prevProp = "_prev" + name;
   this.listeners = {
     added: [],
-    removed: []
+    removed: [],
   };
 }
 var p = DIntrusiveList.prototype;
-p.push = function(o) {
+p.push = function (o) {
   if (this._nextProp in o) {
     throw typeof o + " " + o.constructor + " already in list " + this._nextProp;
   }
@@ -26,19 +26,19 @@ p.push = function(o) {
   if (!this.tail) {
     this.tail = o;
   }
-  this.each(function(o) {
+  this.each(function (o) {
     if (o[this._nextProp] === o) {
       throw "koek";
     }
   });
-  this.listeners["added"].forEach(f => {
+  this.listeners["added"].forEach((f) => {
     f(o);
   });
 };
-p.pop = function() {
+p.pop = function () {
   this.remove(this.root);
 };
-p.remove = function(o) {
+p.remove = function (o) {
   if (!(this._nextProp in o)) {
     throw typeof o + " " + o.constructor + " not in list " + this._nextProp;
   }
@@ -55,11 +55,11 @@ p.remove = function(o) {
   }
   delete o[this._nextProp];
   delete o[this._prevProp];
-  this.listeners["removed"].forEach(f => {
+  this.listeners["removed"].forEach((f) => {
     f(o);
   });
 };
-p.each = function(f) {
+p.each = function (f) {
   var o = this.root;
   if (!o) {
     return;
@@ -79,7 +79,7 @@ p.each = function(f) {
     }
   }
 };
-p.eachReverse = function(f) {
+p.eachReverse = function (f) {
   var o = this.tail;
   if (!o) {
     return;
@@ -99,7 +99,7 @@ p.eachReverse = function(f) {
     }
   }
 };
-p.insertBefore = function(after, o) {
+p.insertBefore = function (after, o) {
   var prev = after && after[prevProp];
   var next = after;
   o[this._nextProp] = next;
@@ -112,7 +112,7 @@ p.insertBefore = function(after, o) {
   } else {
     me.root = o;
   }
-  this.listeners["added"].forEach(f => {
+  this.listeners["added"].forEach((f) => {
     f(o);
   });
 };

@@ -1,7 +1,7 @@
 function rnd() {
   return (Math.random() - 0.5) * 2;
 }
-export default function(g) {
+export default function (g) {
   function quake(time, magnitude) {
     quake.step = magnitude / time;
     quake.magnitude = magnitude;

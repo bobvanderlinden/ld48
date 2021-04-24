@@ -22,7 +22,7 @@ function ParticleEmitter(
 var p = ParticleEmitter.prototype;
 p["updatable"] = true;
 p["drawable"] = true;
-p.update = function(dt) {
+p.update = function (dt) {
   var particles = this.particles;
   var initializeParticle = this.initializeParticle;
   var updateParticle = this.updateParticle;
@@ -42,7 +42,7 @@ p.update = function(dt) {
     updateParticle.call(this, p, dt);
   }
 };
-p.spawn = function(count) {
+p.spawn = function (count) {
   var particles = this.particles;
   var initializeParticle = this.initializeParticle;
   var spawnCount = 0;
@@ -54,7 +54,7 @@ p.spawn = function(count) {
     }
   }
 };
-p.draw = function(g) {
+p.draw = function (g) {
   var particles = this.particles;
   for (i = 0; i < particles.length; i++) {
     var p = particles[i];
@@ -65,7 +65,7 @@ p.draw = function(g) {
   }
 };
 
-ParticleEmitter.defaultUpdate = function(p, dt) {
+ParticleEmitter.defaultUpdate = function (p, dt) {
   p.time -= dt;
   if (p.time < 0) {
     p.active = false;
@@ -75,7 +75,7 @@ ParticleEmitter.defaultUpdate = function(p, dt) {
   p.rot += p.rotrate * dt;
 };
 
-ParticleEmitter.defaultDraw = function(p, g) {
+ParticleEmitter.defaultDraw = function (p, g) {
   g.context.globalAlpha = Math.min(1, p.time) * 0.5;
   // g.context.globalAlpha = 1;
   g.context.save();

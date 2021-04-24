@@ -9,29 +9,29 @@ function ObjectManager() {
   this.pendingRemove = new IntrusiveList("pendingRemove");
 }
 var p = ObjectManager.prototype;
-p.add = function(o) {
+p.add = function (o) {
   this.pendingAdd.push(o);
 };
-p.createIndexList = function(property) {
+p.createIndexList = function (property) {
   var list = new DIntrusiveList(property);
   list.property = property;
   return list;
 };
-p.remove = function(o) {
+p.remove = function (o) {
   if (!this.pendingRemove.contains(o)) {
     this.pendingRemove.push(o);
   }
 };
-p.clear = function(o) {
+p.clear = function (o) {
   var me = this;
   me.handlePending();
-  me.objects.each(o => {
+  me.objects.each((o) => {
     console.log(o);
     me.remove(o);
   });
   me.handlePending();
 };
-p.handlePending = function() {
+p.handlePending = function () {
   var me = this;
   if (me.pendingAdd.root) {
     // console.log('handlePending',me.pendingAdd.root);

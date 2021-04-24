@@ -1,5 +1,5 @@
 import Vector from "./vector.js";
-export default function(game) {
+export default function (game) {
   game.objects.lists.collide = game.objects.createIndexList("collide");
   game.objects.lists.collidable = game.objects.createIndexList("collidable");
   game.on("postupdate", () => {
@@ -13,11 +13,11 @@ export default function(game) {
     var t2 = new Vector(0, 0);
 
     var collisionlines = [];
-    game.objects.lists.collidable.each(o => {
+    game.objects.lists.collidable.each((o) => {
       collisionlines = collisionlines.concat(o.collisionlines);
     });
 
-    game.objects.lists.collide.each(o => {
+    game.objects.lists.collide.each((o) => {
       if (!o.velocity) {
         return;
       }
@@ -45,7 +45,7 @@ export default function(game) {
                 offY *= -1;
                 collisions.push({
                   lineSegment: lineSegment,
-                  offset: offY
+                  offset: offY,
                 });
               } else if (offX < 0 && offX > -o.collisionRadius) {
                 d = o.position.distanceToV(lineSegment.start);
@@ -55,7 +55,7 @@ export default function(game) {
                   t.normalize();
                   collisions.push({
                     lineSegment: lineSegment,
-                    offset: o.collisionRadius - d
+                    offset: o.collisionRadius - d,
                   });
                 }
               } else if (offX > l && offX < l + o.collisionRadius) {
@@ -66,7 +66,7 @@ export default function(game) {
                   t.normalize();
                   collisions.push({
                     lineSegment: lineSegment,
-                    offset: o.collisionRadius - d
+                    offset: o.collisionRadius - d,
                   });
                 }
               }

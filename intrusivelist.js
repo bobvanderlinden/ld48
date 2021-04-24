@@ -5,14 +5,14 @@ function IntrusiveList(name) {
   this._nextProp = "_next" + name;
 }
 var p = IntrusiveList.prototype;
-p.push = function(o) {
+p.push = function (o) {
   if (this._nextProp in o) {
     throw typeof o + " " + o.constructor + " already in list " + this._nextProp;
   }
   o[this._nextProp] = this.root;
   this.root = o;
 };
-p.pop = function() {
+p.pop = function () {
   if (!(this._nextProp in o)) {
     throw typeof o + " " + o.constructor + " not in list " + this._nextProp;
   }
@@ -20,7 +20,7 @@ p.pop = function() {
   this.root = o[this._nextProp];
   return o;
 };
-p.each = function(f) {
+p.each = function (f) {
   var o = this.root;
   if (!o) {
     return;
@@ -46,7 +46,7 @@ p.each = function(f) {
     o = next;
   }
 };
-p.contains = function(findElement) {
+p.contains = function (findElement) {
   var result = false;
   this.each((element, BREAK) => {
     if (element === findElement) {

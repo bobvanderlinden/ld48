@@ -1,14 +1,14 @@
 var keyNames = {
-  "27": "escape",
-  "32": "space",
-  "38": "up",
-  "40": "down",
-  "39": "right",
-  "37": "left",
-  "13": "enter",
-  "16": "shift",
-  "219": "[",
-  "221": "]"
+  27: "escape",
+  32: "space",
+  38: "up",
+  40: "down",
+  39: "right",
+  37: "left",
+  13: "enter",
+  16: "shift",
+  219: "[",
+  221: "]",
 };
 var i;
 // Alphabetic characters
@@ -19,11 +19,11 @@ for (i = 0; i < 27; i++) {
 for (i = 0; i < 10; i++) {
   keyNames[i + 48] = String.fromCharCode(i + 48);
 }
-export default function(g) {
+export default function (g) {
   g.keys = {};
   g.canvas.addEventListener(
     "keyup",
-    event => {
+    (event) => {
       var keyName = keyNames[event.keyCode];
       if (keyName) {
         if (g.keys[keyName]) {
@@ -37,7 +37,7 @@ export default function(g) {
   );
   g.canvas.addEventListener(
     "keydown",
-    event => {
+    (event) => {
       var keyName = keyNames[event.keyCode];
       if (keyName) {
         if (!g.keys[keyName]) {

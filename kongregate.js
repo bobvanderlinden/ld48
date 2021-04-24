@@ -1,4 +1,4 @@
-export default function(g, ready) {
+export default function (g, ready) {
   if (!/^https?:\/\/www.kongregate.com\//.test(document.referrer)) {
     return;
   }

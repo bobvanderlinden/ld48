@@ -1,9 +1,9 @@
-export default function(g) {
+export default function (g) {
   g.mouse = {
     over: false,
     x: 0,
     y: 0,
-    buttons: {}
+    buttons: {},
   };
   function getX(e) {
     return e.pageX - g.canvas.getBoundingClientRect().x;
@@ -13,7 +13,7 @@ export default function(g) {
   }
   g.canvas.addEventListener(
     "mouseup",
-    event => {
+    (event) => {
       if (g.mouse.buttons[event.button]) {
         g.mouse.x = getX(event);
         g.mouse.y = getY(event);
@@ -27,7 +27,7 @@ export default function(g) {
   );
   g.canvas.addEventListener(
     "mousedown",
-    event => {
+    (event) => {
       if (!g.mouse.buttons[event.button]) {
         g.mouse.x = getX(event);
         g.mouse.y = getY(event);
@@ -40,7 +40,7 @@ export default function(g) {
   );
   g.canvas.addEventListener(
     "mousemove",
-    event => {
+    (event) => {
       g.mouse.x = getX(event);
       g.mouse.y = getY(event);
       g.emit("mousemove", g.mouse.x, g.mouse.y);
@@ -49,7 +49,7 @@ export default function(g) {
   );
   g.canvas.addEventListener(
     "mousewheel",
-    event => {
+    (event) => {
       g.mouse.x = getX(event);
       g.mouse.y = getY(event);
       g.emit("mousewheel", event.deltaY, g.mouse.x, g.mouse.y);
@@ -58,7 +58,7 @@ export default function(g) {
   );
   g.canvas.addEventListener(
     "DOMMouseScroll",
-    event => {
+    (event) => {
       g.mouse.x = getX(event);
       g.mouse.y = getY(event);
       g.emit("mousewheel", -event.detail);
