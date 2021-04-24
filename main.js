@@ -704,13 +704,13 @@ function startGame(err) {
     function enable() {
       g.chains.draw.unshift(draw);
       g.chains.update.unshift(update);
-      g.on("keydown", keydown);
+      g.on("mousedown", mousedown);
     }
 
     function disable() {
       g.chains.draw.remove(draw);
       g.chains.update.remove(update);
-      g.removeListener("keydown", keydown);
+      g.removeListener("mousedown", mousedown);
     }
 
     function draw(g, next) {
@@ -719,12 +719,12 @@ function startGame(err) {
       g.fillText("You killed a fish", game.width * 0.5, game.height * 0.5);
     }
 
-    function update(dt, next) {}
-
-    function keydown() {
+    function mousedown() {
       g.restartLevel();
       g.changeState(gameplayState());
     }
+
+    function update(dt, next) {}
 
     return me;
   }
