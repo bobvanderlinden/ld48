@@ -537,9 +537,13 @@ function startGame(err) {
 
     draw(g, next) {
       next(g);
-      g.fillStyle("black");
-      g.drawCenteredImage(images["won"], game.width * 0.5, game.height * 0.5);
-      g.fillText("You win", game.width * 0.5, game.height * 0.5);
+
+      g.save();
+      g.context.translate(game.width * 0.5, game.height * 0.5);
+      const ppm = game.camera.getPixelsPerMeter();
+      g.context.scale(ppm, ppm);
+      g.drawCenteredImage(images["won"], 0, 0);
+      g.restore();
     }
 
     mousedown() {
