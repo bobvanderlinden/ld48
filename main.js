@@ -29,6 +29,7 @@ var rs = {
     "lost",
     "won",
     "background",
+    "air",
   ],
 };
 var g, game;
@@ -102,9 +103,13 @@ function startGame(err) {
     g.context.fillRect(0, 0, 2048, 9999999);
 
     g.context.scale(0.2, 0.2);
+    g.save();
     g.context.translate(0, (game.time * -200) % images["bubbles"].height);
     g.context.fillStyle = g.context.createPattern(images["bubbles"], "repeat");
     g.context.fillRect(0, 0, 2048, 9999999);
+    g.restore();
+
+    g.drawCenteredImage(images["air"], 1024, -images["air"].height / 2 + 64);
 
     g.restore();
     next(g);
@@ -522,7 +527,7 @@ function startGame(err) {
         new Start({ x: 0, y: 0 }),
         new ClownFish(300, 800, 180, 300, {
           top: 0,
-          right: 500,
+          right: 200,
           bottom: 0,
           left: -500,
         }),
