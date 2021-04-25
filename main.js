@@ -24,6 +24,10 @@ import collision from "./collision.js";
 import keyboard from "./keyboard.js";
 import quake from "./quake.js";
 import resources from "./resources.js";
+import TouchSystem from "./touchsystem.js";
+import Camera from "./camera.js";
+import AutoRefresh from "./autorefresh.js";
+
 var rs = {
   images: ["test", "clown", "submarine", "octopus_0", "octopus_1", "octopus_2"],
   audio: ["test"],
@@ -74,171 +78,14 @@ function startGame(err) {
   }
 
   // Auto-refresh
-  (function () {
-    var timeout = setTimeout(function () {
-      document.location.reload(true);
-    }, 3000);
-    g.once("keydown", function () {
-      disable();
-    });
-    g.once("mousemove", function () {
-      disable();
-    });
-    g.chains.draw.unshift(draw);
-    function draw(g, next) {
-      g.fillStyle("#ff0000");
-      g.fillCircle(game.width, 0, 30);
-      g.fillStyle("black");
-      next(g);
-    }
-    function disable() {
-      clearTimeout(timeout);
-      g.chains.draw.remove(draw);
-    }
-  })();
+  game.autoRefresh = new AutoRefresh({ game });
+  // game.autoRefresh.enable();
 
   // Camera
-
-  (function () {
-    game.camera = new Vector(0, 0);
-
-    game.camera.zoom = 1;
-
-    game.camera.screenToWorld = function (screenV, out) {
-      var ptm = getPixelsPerMeter();
-      out.x = (screenV.x - game.width * 0.5) / ptm + game.camera.x;
-      out.y = (screenV.y - game.height * 0.5) / ptm + game.camera.y;
-    };
-
-    // Broken:
-    // game.camera.worldToScreen = function(worldV, out) {
-    //   var ptm = getPixelsPerMeter();
-    //   out.x = (worldV.x - game.camera.x) * ptm;
-    //   out.y = (worldV.y - game.camera.y) * ptm * -1;
-    // };
-
-    game.camera.getPixelsPerMeter = getPixelsPerMeter;
-
-    function getPixelsPerMeter() {
-      const worldWidth = 2048;
-      const screenWidth = game.width;
-      const fraction = screenWidth / worldWidth;
-      return fraction / game.camera.zoom;
-    }
-
-    game.camera.reset = function () {
-      updateCamera();
-      game.camera.x = 0;
-      game.camera.y = 0;
-    };
-
-    function drawCamera(g, next) {
-      var ptm = getPixelsPerMeter();
-
-      // Draw background.
-      // if (!pattern) {
-      //   pattern = g.context.createPattern(images.background, "repeat");
-      // }
-      g.fillStyle("gray");
-      g.fillRectangle(0, 0, game.width, game.height);
-
-      // g.save();
-      // g.context.translate(-game.camera.x * ptm, game.camera.y * ptm);
-      // g.fillStyle(pattern);
-      // g.fillRectangle(
-      //   game.camera.x * ptm,
-      //   -game.camera.y * ptm,
-      //   game.width,
-      //   game.height
-      // );
-      // g.restore();
-
-      // const debugPosition = game.mouse;
-
-      // g.strokeStyle("yellow");
-      // g.strokeCircle(debugPosition.x, debugPosition.y, 10);
-
-      // Transform viewport to match camera.
-      g.save();
-      g.context.scale(ptm, ptm);
-      g.context.lineWidth /= ptm;
-      g.context.translate((game.width / ptm) * 0.5, (game.height / ptm) * 0.5);
-
-      g.context.translate(game.camera.x, -game.camera.y);
-
-      g.strokeStyle("green");
-      g.strokeRectangle(-512, 0, 1024, 1024);
-
-      // const a = new Vector(0, 0);
-      // game.camera.screenToWorld(debugPosition, a);
-      // g.fillStyle("green");
-      // g.fillCircle(a.x, a.y, 20);
-
-      next(g);
-      g.restore();
-    }
-
-    function updateCamera() {}
-
-    g.chains.update.push(
-      (g.chains.update.camera = function (dt, next) {
-        next(dt);
-        updateCamera();
-      })
-    );
-    g.chains.draw.camera = drawCamera;
-    g.chains.draw.insertBefore(drawCamera, g.chains.draw.objects);
-  })();
+  game.camera = new Camera({ game });
 
   // Touching
-  (function () {
-    g.objects.lists.touchable = g.objects.createIndexList("touchable");
-    g.chains.update.insertBefore(function (dt, next) {
-      next(dt);
-      for (const ta of g.objects.lists.touchable) {
-        for (const tb of g.objects.lists.touchable) {
-          detectTouch(ta, tb);
-        }
-        if (ta.touching.size) {
-          for (const tb of ta.touching) {
-            detectTouch(ta, tb);
-          }
-        }
-      }
-    }, g.chains.update.objects);
-
-    function detectTouch(ta, tb) {
-      if (ta === tb) {
-        return;
-      }
-      var areTouching =
-        ta._objectmanager &&
-        tb._objectmanager &&
-        ta.position.distanceToV(tb.position) <= ta.touchRadius + tb.touchRadius;
-      handleTouch(ta, tb, areTouching);
-      handleTouch(tb, ta, areTouching);
-    }
-
-    function handleTouch(o, other, areTouching) {
-      if (!o.touching) {
-        o.touching = new Set();
-      }
-      var wereTouching = o.touching.has(other);
-      if (areTouching !== wereTouching) {
-        if (areTouching) {
-          o.touching.add(other);
-          if (o.touch) {
-            o.touch(other);
-          }
-        } else {
-          o.touching.delete(other);
-          if (o.untouch) {
-            o.untouch(other);
-          }
-        }
-      }
-    }
-  })();
+  game.touchSystem = new TouchSystem({ game, debug: true });
 
   (function () {
     game.chains.draw.push((g, next) => {
@@ -252,28 +99,6 @@ function startGame(err) {
     });
   })();
 
-  // Draw debug objects
-  game.chains.draw.push(function (g, next) {
-    next(g);
-    for (const o of game.objects.lists.touchable) {
-      g.strokeStyle("red");
-      g.strokeCircle(o.position.x, o.position.y, o.touchRadius);
-    }
-  });
-  // (function() {
-  //   game.chains.draw.insertAfter(function(g, next) {
-  //     next(g);
-  //     game.objects.objects.each(function(o) {
-  //       g.strokeStyle("red");
-  //       g.strokeCircle(o.position.x, o.position.y, o.touchRadius || 10);
-  //     });
-  //     for (let y = -10; y < 10; y++) {
-  //       for (let x = -10; x < 10; x++) {
-  //         g.strokeCircle(x, y, 0.5);
-  //       }
-  //     }
-  //   }, game.chains.draw.camera);
-  // })();
   //#gameobjects
 
   // Player
@@ -306,10 +131,8 @@ function startGame(err) {
 
   (function () {
     g.on("levelchanged", () => {
-      for (const o of game.objects.objects) {
-        if (o.start) {
-          o.start();
-        }
+      for (const o of game.objects.lists.start) {
+        o.start();
       }
     });
   })();
