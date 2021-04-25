@@ -224,13 +224,23 @@ function startGame(err) {
     touchable = true;
     touchRadius = 100;
 
-    constructor(x, y, angle, speed) {
-      super(...arguments);
+    constructor({
+      x,
+      y,
+      angle,
+      speed,
+      image = images.fish,
+      top = 0,
+      right = 500,
+      bottom = 0,
+      left = -500,
+    }) {
+      super({ x, y });
       this.startPosition = new Vector(x, y);
       this.relativePosition = new Vector(0, 0);
-      this.image = images["fish"];
+      this.image = image;
       this.size = { width: 1, height: 1 };
-      this.boundaries = new Boundaries(0, 500, 0, -500);
+      this.boundaries = new Boundaries(top, right, bottom, left);
       this.velocity = this.angleAndSpeedtoVector(angle, speed);
     }
 
@@ -262,20 +272,24 @@ function startGame(err) {
   }
 
   class ClownFish extends Fish {
-    constructor(x, y, angle, speed, { top, right, bottom, left }) {
-      super(x, y, angle, speed);
-      this.image = images["clown"];
-      this.size = { width: 1, height: 1 };
-      this.boundaries = new Boundaries(top, right, bottom, left);
+    constructor(args) {
+      super({ image: images.clown, ...args });
     }
   }
 
   class FootballFish extends Fish {
-    constructor(x, y) {
-      super(x, y, 45, 200);
-      this.image = images["football"];
-      this.size = { width: 2, height: 2 };
-      this.boundaries = new Boundaries(-100, 800, 100, -800);
+    constructor({ x, y }) {
+      super({
+        x,
+        y,
+        image: images.football,
+        angle: 45,
+        speed: 200,
+        top: -100,
+        bottom: 100,
+        left: 800,
+        right: -800,
+      });
     }
     update(dt) {
       let velocity = this.velocity.clone();
@@ -310,11 +324,18 @@ function startGame(err) {
   }
 
   class Octopus extends Fish {
-    constructor(x, y) {
-      super(x, y, 15, 300);
-      this.image = images["octopus_0"];
-      this.size = { width: 1, height: 1 };
-      this.boundaries = new Boundaries(-200, 200, 200, -200);
+    constructor({ x, y }) {
+      super({
+        x,
+        y,
+        image: images.octopus_0,
+        angle: 15,
+        speed: 300,
+        top: -200,
+        left: 200,
+        bottom: 200,
+        right: -200,
+      });
       this.frame = 0;
     }
     update(dt) {
@@ -348,10 +369,18 @@ function startGame(err) {
 
   class Seahorse extends Fish {
     //TODO: give rect collision please :)
-    constructor(x, y) {
-      super(x, y, 0, 200);
-      this.image = images["seahorse"];
-      this.boundaries = new Boundaries(0, 1400, 0, -1400);
+    constructor({ x, y }) {
+      super({
+        x,
+        y,
+        image: images.seahorse,
+        angle: 0,
+        speed: 200,
+        top: 0,
+        right: 1400,
+        bottom: 0,
+        left: -1400,
+      });
     }
     update(dt) {
       let velocity = this.velocity.clone();
@@ -439,12 +468,9 @@ function startGame(err) {
     g.restore();
   }
 
-  //#states
-
   class GameplayState {
     constructor({ game }) {
       this.game = game;
-      this.draw = this.draw.bind(this);
       this.update = this.update.bind(this);
       this.keydown = this.keydown.bind(this);
       this.levelchanged = this.levelchanged.bind(this);
@@ -452,7 +478,6 @@ function startGame(err) {
 
     enable() {
       this.game.camera.reset();
-      this.game.chains.draw.unshift(this.draw);
       this.game.chains.update.push(this.update);
       this.game.on("keydown", this.keydown);
       this.game.on("levelchanged", this.levelchanged);
@@ -464,7 +489,6 @@ function startGame(err) {
     }
 
     disable() {
-      this.game.chains.draw.remove(this.draw);
       this.game.chains.update.remove(this.update);
       this.game.removeListener("keydown", this.keydown);
       this.game.removeListener("levelchanged", this.levelchanged);
@@ -496,7 +520,13 @@ function startGame(err) {
         this.game.levelSystem.changeLevel(level_sym1());
         return;
       } else if (key === "e") {
-        this.game.levelSystem.changeState(new EditorState());
+        this.game.changeState(
+          new EditorState({
+            game,
+            gameplayState: this,
+            items: [Start, ClownFish],
+          })
+        );
       }
 
       const movement = new Vector(
@@ -508,65 +538,98 @@ function startGame(err) {
     }
 
     update(dt) {
-      const end = [...game.objects.lists.end][0];
-      game.camera.y = Math.min(
-        this.player.position.y,
-        end.bottom - (game.height * 0.5) / game.camera.getPixelsPerMeter()
+      this.game.camera.screenToWorld(
+        this.game.mouse,
+        this.player.targetPosition
       );
 
+      // Update camera
+      const end = [...this.game.objects.lists.end][0];
+      this.game.camera.y = Math.min(
+        this.player.position.y,
+        end.bottom -
+          (this.game.height * 0.5) / this.game.camera.getPixelsPerMeter()
+      );
+
+      // Check win condition
       if (this.player.position.y > end.position.y) {
-        game.changeState(new WinState());
+        this.game.changeState(new WinState());
       }
     }
-
-    draw(g, next) {
-      // Draw HUD
-      next(g);
-    }
   }
+
+  //#states
 
   function level_sym1() {
     return {
       name: "Level 1",
       objects: [
         new Start({ x: 0, y: 0 }),
-        new ClownFish(300, 800, 180, 300, {
+        new ClownFish({
+          x: 300,
+          y: 800,
+          angle: 180,
+          speed: 300,
           top: 0,
           right: 200,
           bottom: 0,
           left: -500,
         }),
-        new ClownFish(80, 3000, 180, 300, {
+        new ClownFish({
+          x: 80,
+          y: 3000,
+          angle: 180,
+          speed: 300,
           top: 0,
           right: 500,
           bottom: 0,
           left: -500,
         }),
-        new ClownFish(160, 2800, 180, 320, {
+        new ClownFish({
+          x: 160,
+          y: 2800,
+          angle: 180,
+          speed: 320,
           top: 0,
           right: 500,
           bottom: 0,
           left: -500,
         }),
-        new ClownFish(80, 2600, 180, 300, {
+        new ClownFish({
+          x: 80,
+          y: 2600,
+          angle: 180,
+          speed: 300,
           top: 0,
           right: 500,
           bottom: 0,
           left: -500,
         }),
-        new ClownFish(-20, 4600, 0, 300, {
+        new ClownFish({
+          x: -20,
+          y: 4600,
+          angle: 0,
+          speed: 300,
           top: 0,
           right: 500,
           bottom: 0,
           left: -500,
         }),
-        new ClownFish(60, 4400, 0, 320, {
+        new ClownFish({
+          x: 60,
+          y: 4400,
+          angle: 0,
+          speed: 320,
           top: 0,
           right: 500,
           bottom: 0,
           left: -500,
         }),
-        new ClownFish(-20, 4200, 0, 300, {
+        new ClownFish({
+          x: -20,
+          y: 4200,
+          angle: 0,
+          speed: 300,
           top: 0,
           right: 500,
           bottom: 0,
