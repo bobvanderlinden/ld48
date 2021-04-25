@@ -155,6 +155,7 @@ function startGame(err) {
 
   class Player extends GameObject {
     sinkRate = 200;
+    maxSpeed = 500;
     touchable = true;
     touchRadius = 150;
 
@@ -177,12 +178,16 @@ function startGame(err) {
       const mousePosition = new Vector(0, 0);
       game.camera.screenToWorld(game.mouse, mousePosition);
 
-      if (this.position.x !== mousePosition.x) {
-        this.flipped = this.position.x > mousePosition.x;
-      }
-
-      this.position.x = mousePosition.x;
-      this.position.y += dt * this.sinkRate;
+      // Movement
+      const difference = mousePosition.x - this.position.x;
+      const direction = Math.sign(difference);
+      const distance = Math.abs(difference);
+      const moving = distance > 50;
+      const speed = moving ? this.maxSpeed : 0;
+      this.flipped = moving ? direction < 0 : this.flipped;
+      this.velocity.x = this.velocity.x * 0.9 + direction * speed * 0.1;
+      this.velocity.y = this.sinkRate;
+      this.position.addV(this.velocity.clone().multiply(dt));
     }
 
     touch(other) {
