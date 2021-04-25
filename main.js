@@ -147,10 +147,14 @@ function startGame(err) {
     updatable = true;
     touchable = true;
     foreground = true;
+    touchable = true;
+    targetPosition = new Vector(0, 0);
+    lifeTime = 0;
+
     sinkRate = 200;
     maxSpeed = 500;
-    touchable = true;
     touchRadius = 150;
+    slowStartTime = 5;
 
     constructor({ x, y }) {
       super({ x, y });
@@ -168,11 +172,11 @@ function startGame(err) {
     }
 
     update(dt) {
-      const mousePosition = new Vector(0, 0);
-      game.camera.screenToWorld(game.mouse, mousePosition);
+      this.lifeTime += dt;
 
-      // Movement
-      const difference = mousePosition.x - this.position.x;
+      const slowStart = Math.min(this.lifeTime / this.slowStartTime, 1);
+
+      const difference = this.targetPosition.x - this.position.x;
       const direction = Math.sign(difference);
       const distance = Math.abs(difference);
       const moving = distance > 50;
@@ -180,11 +184,10 @@ function startGame(err) {
       this.flipped = moving ? direction < 0 : this.flipped;
       this.velocity.x = this.velocity.x * 0.9 + direction * speed * 0.1;
       this.velocity.y = this.sinkRate;
-      this.position.addV(this.velocity.clone().multiply(dt));
+      this.position.addV(this.velocity.clone().multiply(dt * slowStart));
     }
 
     touch(other) {
-      console.log("touch");
       if (other instanceof Fish) {
         game.changeState(new LoseState());
       }
