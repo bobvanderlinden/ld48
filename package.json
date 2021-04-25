@@ -10,7 +10,7 @@
   "scripts": {
     "prettier": "prettier --write ./**/*.{html,js,css}",
     "start": "esbuild main.js --serve --servedir=. --sourcemap --target=safari13 --bundle",
-    "build": "esbuild main.js --minify --bundle --sourcemap --target=safari13 --bundle"
+    "build": "esbuild main.js --minify --bundle --sourcemap --target=safari13 --outdir=build"
   },
   "repository": {
     "type": "git",
