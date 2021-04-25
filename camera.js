@@ -50,9 +50,6 @@ class Camera extends Vector {
 
     g.context.translate(this.x, -this.y);
 
-    g.strokeStyle("green");
-    g.strokeRectangle(-512, 0, 1024, 1024);
-
     next(g);
 
     g.restore();

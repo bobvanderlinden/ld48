@@ -26,6 +26,8 @@ var rs = {
     "treasure",
     "seahorse",
     "bubbles",
+    "lost",
+    "won",
   ],
 };
 var g, game;
@@ -536,6 +538,7 @@ function startGame(err) {
     draw(g, next) {
       next(g);
       g.fillStyle("black");
+      g.drawCenteredImage(images["won"], game.width * 0.5, game.height * 0.5);
       g.fillText("You win", game.width * 0.5, game.height * 0.5);
     }
 
@@ -572,6 +575,7 @@ function startGame(err) {
     draw(g, next) {
       next(g);
       g.fillStyle("black");
+      g.drawCenteredImage(images["lost"], game.width * 0.5, game.height * 0.5);
       g.fillText("You killed a fish", game.width * 0.5, game.height * 0.5);
     }
 
