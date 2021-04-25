@@ -87,7 +87,7 @@ function startGame(err) {
   game.camera = new Camera({ game });
 
   // Touching
-  game.touchSystem = new TouchSystem({ game, debug: true });
+  game.touchSystem = new TouchSystem({ game, debug: false });
 
   game.levelSystem = new LevelSystem({ game });
 
