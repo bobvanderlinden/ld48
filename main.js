@@ -1,19 +1,4 @@
 "use strict";
-
-function _defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true,
-    });
-  } else {
-    obj[key] = value;
-  }
-  return obj;
-}
-
 import platform from "./platform.js";
 import Game from "./game.js";
 import Vector from "./vector.js";
@@ -134,6 +119,9 @@ function startGame(err) {
   }
 
   class Player extends GameObject {
+    updatable = true;
+    touchable = true;
+    foreground = true;
     sinkRate = 200;
     maxSpeed = 500;
     touchable = true;
@@ -409,10 +397,6 @@ function startGame(err) {
       g.drawCenteredImage(this.image, this.position.x, this.position.y);
     }
   }
-
-  _defineProperty(Player, "updatable", true);
-
-  _defineProperty(Player, "foreground", true);
 
   // draw responsive image which keeps to canvas boundaries
 
