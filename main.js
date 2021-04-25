@@ -89,7 +89,7 @@ function startGame(err) {
 
   // Auto-refresh
   game.autoRefresh = new AutoRefresh({ game });
-  // game.autoRefresh.enable();
+  game.autoRefresh.enable();
 
   // Camera
   game.camera = new Camera({ game });
@@ -343,6 +343,45 @@ function startGame(err) {
     }
   }
 
+  class WavyFish extends GameObject {
+    touchable = true;
+    updatable = true;
+    foreground = true;
+    touchRadius = 100;
+    patrolInterval = 4;
+    waveInterval = 2;
+    phase = 300;
+    speed = 300;
+    constructor(...args) {
+      super(...args);
+      this.velocity = new Vector(0, 0);
+      this.lifetime = 0;
+      this.direction = 1;
+    }
+
+    update(dt) {
+      this.lifetime += dt;
+      this.direction =
+        ((Math.floor(this.lifetime / this.patrolInterval) % 2) - 0.5) * 2;
+      this.velocity = Vector.xaxis
+        .clone()
+        .rotate(Math.sin((this.lifetime * (Math.PI * 2)) / this.waveInterval));
+      this.velocity.x *= this.speed * this.direction;
+      this.velocity.y *= this.phase * this.direction;
+
+      this.position.addV(this.velocity.clone().multiply(dt));
+    }
+
+    drawForeground(g) {
+      g.save();
+      g.context.translate(this.position.x, this.position.y);
+      g.context.rotate(this.velocity.angle());
+      g.context.scale(this.direction, this.direction);
+      g.drawCenteredImage(images.clown, 0, 0);
+      g.restore();
+    }
+  }
+
   class Treasure extends GameObject {
     end = true;
     background = true;
@@ -468,6 +507,7 @@ function startGame(err) {
       name: "Test",
       objects: [
         new Start({ x: 0, y: 0 }),
+        new WavyFish({ x: 500, y: 1000 }),
         new ClownFish(300, 1000),
         new Octopus(60, 2000),
         new FootballFish(80, 3000),
