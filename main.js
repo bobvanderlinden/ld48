@@ -80,7 +80,7 @@ function startGame(err) {
   g.objects.lists.foreground = g.objects.createIndexList("foreground");
   g.objects.lists.grounded = g.objects.createIndexList("grounded");
   g.objects.lists.export = g.objects.createIndexList("export");
-  g.objects.lists.cell = g.objects.createIndexList("cell");
+  g.objects.lists.end = g.objects.createIndexList("end");
   g.objects.lists.editorVisible = g.objects.createIndexList("editorVisible");
 
   function pickRandom(arr) {
@@ -374,6 +374,23 @@ function startGame(err) {
     }
   }
 
+  class Treasure extends GameObject {
+    end = true;
+    background = true;
+    constructor({ x, y }) {
+      super({ x, y });
+      this.image = images["treasure"];
+    }
+
+    get bottom() {
+      return this.position.y + this.image.height * 0.5;
+    }
+
+    drawBackground(g) {
+      g.drawCenteredImage(this.image, this.position.x, this.position.y);
+    }
+  }
+
   _defineProperty(Player, "updatable", true);
 
   _defineProperty(Player, "foreground", true);
@@ -608,7 +625,15 @@ function startGame(err) {
     }
 
     update(dt) {
-      game.camera.y = player.position.y;
+      const end = [...game.objects.lists.end][0];
+      game.camera.y = Math.min(
+        player.position.y,
+        end.bottom - (game.height * 0.5) / game.camera.getPixelsPerMeter()
+      );
+
+      if (player.position.y > end.position.y) {
+        game.changeState(new WinState());
+      }
     }
 
     draw(g, next) {
@@ -626,10 +651,47 @@ function startGame(err) {
         new Octopus(60, 2000),
         new FootballFish(80, 3000),
         new Seahorse(200, 4000),
+        new Treasure({ x: 0, y: 4500 }),
       ],
       clone: level_sym1,
       nextLevel: null,
     };
+  }
+
+  class WinState {
+    constructor() {
+      this.draw = this.draw.bind(this);
+      this.mousedown = this.mousedown.bind(this);
+      this.update = this.update.bind(this);
+    }
+
+    enable() {
+      g.chains.draw.unshift(this.draw);
+      g.chains.update.unshift(this.update);
+      g.on("mousedown", this.mousedown);
+    }
+
+    disable() {
+      g.chains.draw.remove(this.draw);
+      g.chains.update.remove(this.update);
+      g.removeListener("mousedown", this.mousedown);
+    }
+
+    draw(g, next) {
+      next(g);
+      g.fillStyle("black");
+      g.fillText("You win", game.width * 0.5, game.height * 0.5);
+    }
+
+    mousedown() {
+      g.restartLevel();
+      g.changeState(new GameplayState());
+    }
+
+    update(dt, next) {
+      // Avoid updating the game.
+      //
+    }
   }
 
   class LoseState {
