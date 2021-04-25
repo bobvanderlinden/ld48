@@ -35,6 +35,7 @@ var rs = {
     "octopus_2",
     "football",
     "treasure",
+    "seahorse",
   ],
 };
 var g, game;
@@ -473,7 +474,6 @@ function startGame(err) {
       g.save();
       g.context.translate(this.position.x, this.position.y);
       g.context.scale(this.velocity.x < 0 ? 1 : -1, 1);
-      console.log(this.velocity.angle());
       g.context.rotate(
         this.velocity.x < 0
           ? this.velocity.angle() + Math.PI
@@ -516,6 +516,31 @@ function startGame(err) {
       g.save();
       g.context.translate(this.position.x, this.position.y);
       g.context.scale(this.velocity.x < 0 ? -1 : 1, 1);
+      g.drawCenteredImage(this.image, 0, 0);
+      g.restore();
+    }
+  }
+
+  class Seahorse extends Fish {
+    //TODO: give rect collision please :)
+    constructor() {
+      super(20, 600, 0, 200);
+      this.image = images["seahorse"];
+      this.boundaries = new Boundaries(0, 1400, 0, -1400);
+    }
+    update(dt) {
+      let velocity = this.velocity.clone();
+      this.relativePosition.addV(velocity.multiply(dt));
+
+      if (this.relativePosition.x > this.boundaries.right) {
+        this.relativePosition.x = this.boundaries.left;
+      }
+      this.position = this.startPosition.clone().addV(this.relativePosition);
+    }
+    drawForeground(g) {
+      g.save();
+      g.context.translate(this.position.x, this.position.y);
+      g.context.scale(1, 1);
       g.drawCenteredImage(this.image, 0, 0);
       g.restore();
     }
@@ -772,6 +797,7 @@ function startGame(err) {
         new ClownFish({ x: 0, y: 500 }),
         new Octopus(),
         new FootballFish(),
+        new Seahorse(),
       ],
       clone: level_sym1,
       nextLevel: null,
