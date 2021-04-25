@@ -40,6 +40,7 @@ var rs = {
     "football",
     "treasure",
     "seahorse",
+    "bubbles",
   ],
 };
 var g, game;
@@ -96,6 +97,16 @@ function startGame(err) {
 
   // Touching
   game.touchSystem = new TouchSystem({ game, debug: true });
+
+  game.chains.draw.push((g, next) => {
+    g.save();
+    let pattern = g.context.createPattern(images["bubbles"], "repeat");
+    g.context.fillStyle = pattern;
+    g.context.translate(-1024, 0);
+    g.context.fillRect(0, 0, 2048, 9999999);
+    g.restore();
+    next(g);
+  });
 
   (function () {
     game.chains.draw.push((g, next) => {

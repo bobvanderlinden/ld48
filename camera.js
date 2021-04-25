@@ -36,8 +36,7 @@ class Camera extends Vector {
 
   draw(g, next) {
     var ptm = this.getPixelsPerMeter();
-
-    g.fillStyle("gray");
+    g.fillStyle("white");
     g.fillRectangle(0, 0, this.game.width, this.game.height);
 
     // Transform viewport to match camera.
