@@ -3,7 +3,7 @@ import platform from "./platform.js";
 import Game from "./game.js";
 import Vector from "./vector.js";
 import state from "./state.js";
-import level from "./level.js";
+import LevelSystem from "./levelsystem.js";
 import mouse from "./mouse.js";
 import collision from "./collision.js";
 import keyboard from "./keyboard.js";
@@ -38,7 +38,6 @@ platform.once("load", () => {
     keyboard,
     resources(rs),
     state,
-    level,
     collision,
     quake,
   ]);
@@ -84,6 +83,8 @@ function startGame(err) {
 
   // Touching
   game.touchSystem = new TouchSystem({ game, debug: true });
+
+  game.levelSystem = new LevelSystem({ game });
 
   game.chains.draw.push((g, next) => {
     g.save();
@@ -461,16 +462,16 @@ function startGame(err) {
 
     keydown(key) {
       if (key === "r") {
-        this.game.restartLevel();
+        this.game.levelSystem.restartLevel();
         return;
       } else if (key === "n") {
-        this.game.nextLevel();
+        this.game.levelSystem.nextLevel();
         return;
       } else if (key === "m") {
-        this.game.changeLevel(level_sym1());
+        this.game.levelSystem.changeLevel(level_sym1());
         return;
       } else if (key === "e") {
-        this.game.changeState(new EditorState());
+        this.game.levelSystem.changeState(new EditorState());
       }
 
       const movement = new Vector(
@@ -547,8 +548,8 @@ function startGame(err) {
     }
 
     mousedown() {
-      g.restartLevel();
-      g.changeState(new GameplayState({ game }));
+      game.levelSystem.nextLevel();
+      game.changeState(new GameplayState({ game }));
     }
 
     update(dt, next) {
@@ -588,8 +589,8 @@ function startGame(err) {
     }
 
     mousedown() {
-      g.restartLevel();
-      g.changeState(new GameplayState({ game }));
+      game.restartLevel();
+      game.changeState(new GameplayState({ game }));
     }
 
     update(dt, next) {
@@ -598,7 +599,7 @@ function startGame(err) {
     }
   }
 
-  game.changeLevel(level_sym1());
+  game.levelSystem.changeLevel(level_sym1());
   game.objects.handlePending();
   game.changeState(new GameplayState({ game }));
   game.start();
