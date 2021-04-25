@@ -12,6 +12,7 @@ import resources from "./resources.js";
 import TouchSystem from "./touchsystem.js";
 import Camera from "./camera.js";
 import AutoRefresh from "./autorefresh.js";
+import Mouse from "./mouse.js";
 
 var rs = {
   audio: ["test"],
@@ -35,13 +36,15 @@ var g, game;
 platform.once("load", () => {
   var canvas = document.getElementById("main");
   game = g = new Game(startGame, canvas, [
-    mouse,
     keyboard,
     resources(rs),
     state,
     collision,
     quake,
   ]);
+
+  game.mouse = new Mouse({ game });
+
   g.resources.status.on("changed", () => {
     g.graphics.context.clearRect(0, 0, game.width, game.height);
     g.graphics.context.fillStyle = "black";
