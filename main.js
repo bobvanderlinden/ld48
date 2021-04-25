@@ -251,10 +251,11 @@ function startGame(err) {
   }
 
   class ClownFish extends Fish {
-    constructor(x, y) {
-      super(x, y, 180, 400);
+    constructor(x, y, angle, speed, { top, right, bottom, left }) {
+      super(x, y, angle, speed);
       this.image = images["clown"];
       this.size = { width: 1, height: 1 };
+      this.boundaries = new Boundaries(top, right, bottom, left);
     }
   }
 
@@ -516,7 +517,61 @@ function startGame(err) {
 
   function level_sym1() {
     return {
-      name: "Test",
+      name: "Level 1",
+      objects: [
+        new Start({ x: 0, y: 0 }),
+        new ClownFish(300, 800, 180, 300, {
+          top: 0,
+          right: 500,
+          bottom: 0,
+          left: -500,
+        }),
+        new ClownFish(80, 3000, 180, 300, {
+          top: 0,
+          right: 500,
+          bottom: 0,
+          left: -500,
+        }),
+        new ClownFish(160, 2800, 180, 320, {
+          top: 0,
+          right: 500,
+          bottom: 0,
+          left: -500,
+        }),
+        new ClownFish(80, 2600, 180, 300, {
+          top: 0,
+          right: 500,
+          bottom: 0,
+          left: -500,
+        }),
+        new ClownFish(-20, 4600, 0, 300, {
+          top: 0,
+          right: 500,
+          bottom: 0,
+          left: -500,
+        }),
+        new ClownFish(60, 4400, 0, 320, {
+          top: 0,
+          right: 500,
+          bottom: 0,
+          left: -500,
+        }),
+        new ClownFish(-20, 4200, 0, 300, {
+          top: 0,
+          right: 500,
+          bottom: 0,
+          left: -500,
+        }),
+        new Treasure({ x: 0, y: 6000 }),
+      ],
+      clone: level_sym1,
+      nextLevel: level_sym2,
+    };
+  }
+
+  function level_sym2() {
+    return {
+      name: "Level 2",
       objects: [
         new Start({ x: 0, y: 0 }),
         new WavyFish({ x: 500, y: 1000 }),
@@ -526,11 +581,10 @@ function startGame(err) {
         new Seahorse(200, 4000),
         new Treasure({ x: 0, y: 4500 }),
       ],
-      clone: level_sym1,
+      clone: level_sym2,
       nextLevel: null,
     };
   }
-
   class WinState {
     constructor() {
       this.draw = this.draw.bind(this);
