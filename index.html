@@ -4,12 +4,32 @@
     <link href="main.css" rel="stylesheet" type="text/css" />
     <!-- <script data-main="main" src="require.js"></script> -->
     <script type="module" src="./main.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Freckle+Face&display=swap"
+      rel="stylesheet"
+    />
   </head>
 
   <body>
     <!-- <audio src="assets/music.mp3" type="audio/mpeg" autoplay="1" loop="1"></audio> -->
-    <div id="container" style="--aspect-ratio: 9/16">
-      <canvas id="main" width="900" height="1600"></canvas>
+    <div id="explaination">
+      <h1>Welcome to "Just keep sinking"</h1>
+      <p>Use your mouse to move the submarine left and right.</p>
+      <p>If you die, click with your mouse to start again!</p>
+      <p>
+        "The year is 1932. You're on the deep-see diver Aquasphere and your
+        mission is to chart the depths of the unknown ocean. But your captain is
+        far ahead of his time, and has little patience for navigators who kill
+        the ocean life they are trying to discover. Three strikes and you're
+        fired!"
+      </p>
     </div>
+    <div id="game">
+      <div id="container" style="--aspect-ratio: 9/16">
+        <canvas id="main" width="900" height="1600"></canvas>
+      </div>
+    </div>
+    <div id="score">1000</div>
   </body>
 </html>
