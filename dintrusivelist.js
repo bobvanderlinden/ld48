@@ -15,6 +15,10 @@ class DIntrusiveList {
     };
   }
 
+  get first() {
+    return this.root;
+  }
+
   push(o) {
     if (this._nextProp in o) {
       throw (

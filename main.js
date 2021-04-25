@@ -112,45 +112,14 @@ function startGame(err) {
   //#gameobjects
 
   // Player
-
-  class Start {
-    constructor({ x, y }) {
-      this.position = new Vector(x, y);
-    }
-
-    start() {
-      if (this.spawned) {
-        return;
-      }
-
-      player = new Player({
-        x: this.position.x,
-        y: this.position.y,
-      });
-      game.objects.add(player);
-      this.spawned = true;
-    }
-
-    drawForeground(g) {
-      g.fillStyle("red");
-      g.fillCircle(this.position.x, this.position.y, 0.3);
-    }
-  }
-
-  _defineProperty(Start, "editorVisible", true);
-
-  (function () {
-    g.on("levelchanged", () => {
-      for (const o of game.objects.lists.start) {
-        o.start();
-      }
-    });
-  })();
-
   class GameObject {
     constructor({ x, y }) {
       this.position = new Vector(x, y);
     }
+  }
+
+  class Start extends GameObject {
+    start = true;
   }
 
   class Player extends GameObject {
@@ -159,8 +128,8 @@ function startGame(err) {
     touchable = true;
     touchRadius = 150;
 
-    constructor() {
-      super({ x: 0, y: 0 });
+    constructor({ x, y }) {
+      super({ x, y });
       this.image = images["submarine"];
       this.velocity = new Vector(0, 0);
       this.flipped = false;
@@ -395,179 +364,6 @@ function startGame(err) {
 
   _defineProperty(Player, "foreground", true);
 
-  // #editor
-
-  const items = [Start];
-  let item = items[0];
-  let leveldef = [];
-
-  function editorState() {
-    const me = {
-      enable,
-      disable,
-    };
-
-    function enable() {
-      console.log("enable editor");
-      game.chains.draw.push(draw);
-      g.on("mousedown", mousedown);
-      g.on("keydown", keydown);
-      g.chains.update.push(update);
-      g.chains.update.remove(game.chains.update.camera);
-      g.chains.update.remove(game.chains.update.objects);
-    }
-
-    function disable() {
-      console.log("disable editor");
-      game.chains.draw.remove(draw);
-      g.removeListener("mousedown", mousedown);
-      g.removeListener("keydown", keydown);
-      g.chains.update.remove(update);
-      g.chains.update.push(game.chains.update.camera);
-      g.chains.update.push(game.chains.update.objects);
-    }
-
-    function update(dt, next) {
-      const movement = new Vector(
-        (game.keys.right ? 1 : 0) - (game.keys.left ? 1 : 0),
-        (game.keys.up ? 1 : 0) - (game.keys.down ? 1 : 0)
-      );
-      game.camera.x += movement.x * dt * 10;
-      game.camera.y += movement.y * dt * 10;
-      game.objects.handlePending();
-      next(dt);
-    }
-
-    function createLevel() {
-      return {
-        name: "level",
-        objects: leveldef.map(
-          ([item, x, y]) =>
-            new item({
-              x,
-              y,
-            })
-        ),
-        clone: createLevel,
-        nextLevel: createLevel,
-      };
-    }
-
-    function getPosition() {
-      var tmp = new Vector();
-      game.camera.screenToWorld(game.mouse, tmp);
-      tmp.x = Math.round(tmp.x);
-      tmp.y = Math.round(tmp.y);
-      return tmp;
-    }
-
-    function place() {
-      var p = getPosition();
-      leveldef.push([item, p.x, p.y]);
-      game.objects.add(
-        new item({
-          x: p.x,
-          y: p.y,
-        })
-      );
-    }
-
-    function deleteItem() {
-      var p = getPosition();
-      const obj = getCell(p.x, p.y);
-      obj.forEach((o) => o.destroy());
-      leveldef = leveldef.filter(([_, x, y]) => x !== p.x || y !== p.y);
-    }
-
-    function load() {
-      leveldef = [];
-      for (const obj of game.objects.lists.export) {
-        leveldef.push([obj.constructor, obj.position.x, obj.position.y]);
-      }
-    }
-
-    function save() {
-      let str = leveldef
-        .map(([item, x, y]) => `new ${item.name}({ x: ${x}, y: ${y}}),`)
-        .join("\n");
-      str += "\nnew Start({ x: 2, y: -1 })";
-      console.log(str);
-    }
-
-    function mousedown(button) {
-      if (button === 0) {
-        place();
-      } else if (button === 2) {
-        deleteItem();
-      }
-    }
-
-    function keydown(key) {
-      if (key === "p") {
-        save();
-      } else if (key === "i") {
-        load();
-      } else if (key === "e") {
-        game.changeState(new GameplayState());
-      } else if (key === "r") {
-        game.changeLevel(createLevel());
-      }
-
-      var d = (key === "]" ? 1 : 0) - (key === "[" ? 1 : 0);
-      item = items[(items.indexOf(item) + d + items.length) % items.length];
-    }
-
-    function draw(g, next) {
-      next(g);
-      for (const o of game.objects.lists.editorVisible) {
-        o.drawForeground(g);
-      }
-      const leftTop = new Vector();
-      game.camera.screenToWorld(Vector.zero, leftTop);
-      const rightBottom = new Vector();
-      game.camera.screenToWorld(
-        new Vector(game.width, game.height),
-        rightBottom
-      );
-      leftTop.x = Math.floor(leftTop.x);
-      leftTop.y = Math.floor(leftTop.y);
-      rightBottom.x = Math.ceil(rightBottom.x);
-      rightBottom.y = Math.ceil(rightBottom.y);
-      g.context.globalAlpha = 0.1;
-      g.strokeStyle("black");
-
-      for (let x = leftTop.x; x < rightBottom.x; x++) {
-        g.strokeLine(x - 0.5, leftTop.y, x - 0.5, rightBottom.y);
-      }
-
-      for (let y = leftTop.y; y < rightBottom.y; y++) {
-        g.strokeLine(leftTop.x, y - 0.5, rightBottom.x, y - 0.5);
-      }
-
-      g.context.globalAlpha = 1;
-      var p = getPosition();
-      g.fillStyle("black");
-      g.fillCircle(p.x, p.y, 0.1);
-
-      if (item) {
-        g.context.globalAlpha = 0.5;
-        item.prototype.drawForeground.call(
-          {
-            position: {
-              x: p.x,
-              y: p.y,
-            },
-            tile: item.tile,
-          },
-          g
-        );
-        g.context.globalAlpha = 1;
-      }
-    }
-
-    return me;
-  }
-
   // draw responsive image which keeps to canvas boundaries
 
   function drawOverlayImage(g, image) {
@@ -583,37 +379,62 @@ function startGame(err) {
   //#states
 
   class GameplayState {
-    constructor() {
+    constructor({ game }) {
+      this.game = game;
       this.draw = this.draw.bind(this);
       this.update = this.update.bind(this);
       this.keydown = this.keydown.bind(this);
+      this.levelchanged = this.levelchanged.bind(this);
     }
 
     enable() {
-      game.camera.reset();
-      g.chains.draw.unshift(this.draw);
-      g.chains.update.push(this.update);
-      g.on("keydown", this.keydown);
+      this.game.camera.reset();
+      this.game.chains.draw.unshift(this.draw);
+      this.game.chains.update.push(this.update);
+      this.game.on("keydown", this.keydown);
+      this.game.on("levelchanged", this.levelchanged);
+
+      console.log(game.objects.lists.start);
+      const start = game.objects.lists.start.first;
+      if (this.start !== start) {
+        this.spawnPlayer(start);
+      }
     }
 
     disable() {
-      g.chains.draw.remove(this.draw);
-      g.chains.update.remove(this.update);
-      g.removeListener("keydown", this.keydown);
+      this.game.chains.draw.remove(this.draw);
+      this.game.chains.update.remove(this.update);
+      this.game.removeListener("keydown", this.keydown);
+      this.game.removeListener("levelchanged", this.levelchanged);
+    }
+
+    levelchanged() {
+      const start = game.objects.lists.start.first;
+      this.spawnPlayer(start);
+    }
+
+    spawnPlayer(start) {
+      this.start = start;
+      const player = new Player({
+        x: start.position.x,
+        y: start.position.y,
+      });
+      this.player = player;
+      game.objects.add(player);
     }
 
     keydown(key) {
       if (key === "r") {
-        game.restartLevel();
+        this.game.restartLevel();
         return;
       } else if (key === "n") {
-        game.nextLevel();
+        this.game.nextLevel();
         return;
       } else if (key === "m") {
-        game.changeLevel(level_sym1());
+        this.game.changeLevel(level_sym1());
         return;
       } else if (key === "e") {
-        game.changeState(new EditorState());
+        this.game.changeState(new EditorState());
       }
 
       const movement = new Vector(
@@ -621,17 +442,17 @@ function startGame(err) {
         (key === "down" ? 1 : 0) - (key === "up" ? 1 : 0)
       );
 
-      player.movement = movement;
+      this.player.movement = movement;
     }
 
     update(dt) {
       const end = [...game.objects.lists.end][0];
       game.camera.y = Math.min(
-        player.position.y,
+        this.player.position.y,
         end.bottom - (game.height * 0.5) / game.camera.getPixelsPerMeter()
       );
 
-      if (player.position.y > end.position.y) {
+      if (this.player.position.y > end.position.y) {
         game.changeState(new WinState());
       }
     }
@@ -685,7 +506,7 @@ function startGame(err) {
 
     mousedown() {
       g.restartLevel();
-      g.changeState(new GameplayState());
+      g.changeState(new GameplayState({ game }));
     }
 
     update(dt, next) {
@@ -721,7 +542,7 @@ function startGame(err) {
 
     mousedown() {
       g.restartLevel();
-      g.changeState(new GameplayState());
+      g.changeState(new GameplayState({ game }));
     }
 
     update(dt, next) {
@@ -730,10 +551,9 @@ function startGame(err) {
     }
   }
 
-  var player = new Player();
-  g.changeLevel(level_sym1());
-  g.changeState(new GameplayState());
+  game.changeLevel(level_sym1());
   game.objects.handlePending();
-  g.start();
+  game.changeState(new GameplayState({ game }));
+  game.start();
   window.game = game;
 }
