@@ -7,8 +7,6 @@ body {
   overflow: hidden;
   font-family: "Freckle Face", cursive;
   font-size: 15px;
-  display: grid;
-  grid-template-columns: 300px 1fr 300px;
   background-color: #36096d;
   background-image: linear-gradient(315deg, #36096d 0%, #37d5d6 74%);
   background-repeat: no-repeat;
@@ -18,6 +16,24 @@ body {
 
 p {
   font-family: arial;
+}
+
+#game-wrapper, #game {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 999px) {
+  #explaination, #score {
+    display: none;
+  }
+}
+
+@media (min-width: 1000px) {
+  #game-wrapper {
+    display: grid;
+    grid-template-columns: 300px 1fr 300px;
+  }
 }
 
 #explaination {
