@@ -25,10 +25,10 @@ p.remove = function (o) {
 p.clear = function (o) {
   var me = this;
   me.handlePending();
-  me.objects.each((o) => {
+  for (const o of me.objects) {
     console.log(o);
     me.remove(o);
-  });
+  }
   me.handlePending();
 };
 p.handlePending = function () {

@@ -33,18 +33,18 @@ function Game(start, canvas, components) {
 
   this.chains.draw.push(
     (this.chains.draw.objects = function (g, next) {
-      me.objects.lists.draw.each((o) => {
+      for (const o of me.objects.lists.draw) {
         o.draw(g);
-      });
+      }
       next(g);
     })
   );
 
   this.chains.update.push(
     (this.chains.update.objects = function updateObjects(dt, next) {
-      me.objects.lists.update.each((o) => {
+      for (const o of me.objects.lists.update) {
         o.update(dt);
-      });
+      }
       me.objects.handlePending();
       next(dt);
     })

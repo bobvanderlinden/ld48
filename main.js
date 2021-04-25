@@ -203,16 +203,16 @@ function startGame(err) {
     g.objects.lists.touchable = g.objects.createIndexList("touchable");
     g.chains.update.insertBefore(function (dt, next) {
       next(dt);
-      g.objects.lists.touchable.each(function (ta) {
-        g.objects.lists.touchable.each(function (tb) {
+      for (const ta of g.objects.lists.touchable) {
+        for (const tb of g.objects.lists.touchable) {
           detectTouch(ta, tb);
-        });
-        if (ta.touching) {
-          ta.touching.forEach(function (tb) {
-            detectTouch(ta, tb);
-          });
         }
-      });
+        if (ta.touching.size) {
+          for (const tb of ta.touching) {
+            detectTouch(ta, tb);
+          }
+        }
+      }
     }, g.chains.update.objects);
 
     function detectTouch(ta, tb) {
@@ -250,12 +250,12 @@ function startGame(err) {
 
   (function () {
     game.chains.draw.push((g, next) => {
-      game.objects.lists.background.each((o) => {
+      for (const o of game.objects.lists.background) {
         o.drawBackground(g);
-      });
-      game.objects.lists.foreground.each((o) => {
+      }
+      for (const o of game.objects.lists.foreground) {
         o.drawForeground(g);
-      });
+      }
       next(g);
     });
   })();
@@ -263,10 +263,10 @@ function startGame(err) {
   // Draw debug objects
   game.chains.draw.push(function (g, next) {
     next(g);
-    game.objects.lists.touchable.each((o) => {
+    for (const o of game.objects.lists.touchable) {
       g.strokeStyle("red");
       g.strokeCircle(o.position.x, o.position.y, o.touchRadius);
-    });
+    }
   });
   // (function() {
   //   game.chains.draw.insertAfter(function(g, next) {
@@ -314,11 +314,11 @@ function startGame(err) {
 
   (function () {
     g.on("levelchanged", () => {
-      game.objects.objects.each((o) => {
+      for (const o of game.objects.objects) {
         if (o.start) {
           o.start();
         }
-      });
+      }
     });
   })();
 
@@ -610,9 +610,9 @@ function startGame(err) {
 
     function load() {
       leveldef = [];
-      game.objects.lists.export.each((obj) => {
+      for (const obj of game.objects.lists.export) {
         leveldef.push([obj.constructor, obj.position.x, obj.position.y]);
-      });
+      }
     }
 
     function save() {
@@ -648,9 +648,9 @@ function startGame(err) {
 
     function draw(g, next) {
       next(g);
-      game.objects.lists.editorVisible.each((o) => {
+      for (const o of game.objects.lists.editorVisible) {
         o.drawForeground(g);
-      });
+      }
       const leftTop = new Vector();
       game.camera.screenToWorld(Vector.zero, leftTop);
       const rightBottom = new Vector();
@@ -695,7 +695,9 @@ function startGame(err) {
     }
 
     return me;
-  } // draw responsive image which keeps to canvas boundaries
+  }
+
+  // draw responsive image which keeps to canvas boundaries
 
   function drawOverlayImage(g, image) {
     g.save();
