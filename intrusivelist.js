@@ -73,7 +73,7 @@ class IntrusiveList {
   }
 
   contains(findElement) {
-    const result = false;
+    let result = false;
     this.each((element, BREAK) => {
       if (element === findElement) {
         result = true;
