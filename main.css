@@ -34,6 +34,10 @@ p {
   padding: 20px;
 }
 
+#main {
+  touch-action: none;
+}
+
 [style*="--aspect-ratio"] {
   position: relative;
   width: calc(90vh * (var(--aspect-ratio)));
