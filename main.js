@@ -261,16 +261,16 @@ function startGame(err) {
   }
 
   class ClownFish extends Fish {
-    constructor() {
-      super(0, 0, 180, 400);
+    constructor(x, y) {
+      super(x, y, 180, 400);
       this.image = images["clown"];
       this.size = { width: 1, height: 1 };
     }
   }
 
   class FootballFish extends Fish {
-    constructor() {
-      super(15, 20, 45, 200);
+    constructor(x, y) {
+      super(x, y, 45, 200);
       this.image = images["football"];
       this.size = { width: 2, height: 2 };
       this.boundaries = new Boundaries(-100, 800, 100, -800);
@@ -308,8 +308,8 @@ function startGame(err) {
   }
 
   class Octopus extends Fish {
-    constructor() {
-      super(10, 5, 15, 300);
+    constructor(x, y) {
+      super(x, y, 15, 300);
       this.image = images["octopus_0"];
       this.size = { width: 1, height: 1 };
       this.boundaries = new Boundaries(-200, 200, 200, -200);
@@ -346,8 +346,8 @@ function startGame(err) {
 
   class Seahorse extends Fish {
     //TODO: give rect collision please :)
-    constructor() {
-      super(20, 600, 0, 200);
+    constructor(x, y) {
+      super(x, y, 0, 200);
       this.image = images["seahorse"];
       this.boundaries = new Boundaries(0, 1400, 0, -1400);
     }
@@ -617,10 +617,10 @@ function startGame(err) {
       name: "Test",
       objects: [
         new Start({ x: 0, y: 0 }),
-        new ClownFish({ x: 0, y: 500 }),
-        new Octopus(),
-        new FootballFish(),
-        new Seahorse(),
+        new ClownFish(300, 1000),
+        new Octopus(60, 2000),
+        new FootballFish(80, 3000),
+        new Seahorse(200, 4000),
       ],
       clone: level_sym1,
       nextLevel: null,
