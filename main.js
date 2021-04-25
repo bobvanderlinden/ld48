@@ -665,7 +665,7 @@ function startGame(err) {
     }
 
     mousedown() {
-      game.restartLevel();
+      game.levelSystem.restartLevel();
       game.changeState(new GameplayState({ game }));
     }
 
