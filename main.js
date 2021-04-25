@@ -28,6 +28,7 @@ var rs = {
     "bubbles",
     "lost",
     "won",
+    "background",
   ],
 };
 var g, game;
@@ -88,10 +89,23 @@ function startGame(err) {
 
   game.chains.draw.push((g, next) => {
     g.save();
-    let pattern = g.context.createPattern(images["bubbles"], "repeat");
-    g.context.fillStyle = pattern;
     g.context.translate(-1024, 0);
+    g.context.scale(5, 5);
+
+    g.context.fillStyle = "#0fb0fe";
     g.context.fillRect(0, 0, 2048, 9999999);
+
+    g.context.fillStyle = g.context.createPattern(
+      images["background"],
+      "repeat"
+    );
+    g.context.fillRect(0, 0, 2048, 9999999);
+
+    g.context.scale(0.2, 0.2);
+    g.context.translate(0, (game.time * -200) % images["bubbles"].height);
+    g.context.fillStyle = g.context.createPattern(images["bubbles"], "repeat");
+    g.context.fillRect(0, 0, 2048, 9999999);
+
     g.restore();
     next(g);
   });
