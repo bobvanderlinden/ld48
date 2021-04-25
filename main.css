@@ -1,0 +1,54 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: "Freckle Face", cursive;
+  font-size: 15px;
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  background-color: #36096d;
+  background-image: linear-gradient(315deg, #36096d 0%, #37d5d6 74%);
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 100vh;
+}
+
+p {
+  font-family: arial;
+}
+
+#explaination {
+  padding: 20px;
+}
+
+#game {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#score {
+  padding: 20px;
+}
+
+[style*="--aspect-ratio"] {
+  position: relative;
+  width: calc(90vh * (var(--aspect-ratio)));
+}
+
+[style*="--aspect-ratio"]::before {
+  content: "";
+  display: block;
+  padding-bottom: calc(100% / (var(--aspect-ratio)));
+}
+
+[style*="--aspect-ratio"] > :first-child {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
