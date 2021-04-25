@@ -454,7 +454,6 @@ function startGame(err) {
       this.game.on("keydown", this.keydown);
       this.game.on("levelchanged", this.levelchanged);
 
-      console.log(game.objects.lists.start);
       const start = game.objects.lists.start.first;
       if (this.start !== start) {
         this.spawnPlayer(start);
