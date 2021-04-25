@@ -81,7 +81,7 @@ function startGame(err) {
 
   // Auto-refresh
   game.autoRefresh = new AutoRefresh({ game });
-  game.autoRefresh.enable();
+  // game.autoRefresh.enable();
 
   // Camera
   game.camera = new Camera({ game });
