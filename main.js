@@ -33,7 +33,8 @@ var rs = {
     "octopus_0",
     "octopus_1",
     "octopus_2",
-    "football"
+    "football",
+    "treasure",
   ],
 };
 var g, game;
@@ -770,7 +771,7 @@ function startGame(err) {
         new Start({ x: 0, y: 0 }),
         new ClownFish({ x: 0, y: 500 }),
         new Octopus(),
-        new FootballFish()
+        new FootballFish(),
       ],
       clone: level_sym1,
       nextLevel: null,
