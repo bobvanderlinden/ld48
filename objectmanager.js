@@ -26,7 +26,6 @@ p.clear = function (o) {
   var me = this;
   me.handlePending();
   for (const o of me.objects) {
-    console.log(o);
     me.remove(o);
   }
   me.handlePending();

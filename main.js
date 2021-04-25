@@ -13,6 +13,7 @@ import TouchSystem from "./touchsystem.js";
 import Camera from "./camera.js";
 import AutoRefresh from "./autorefresh.js";
 import Mouse from "./mouse.js";
+import EditorState from "./editorstate.js";
 
 var rs = {
   audio: ["test"],
@@ -132,7 +133,6 @@ function startGame(err) {
 
   //#gameobjects
 
-  // Player
   class GameObject {
     constructor({ x, y }) {
       this.position = new Vector(x, y);
@@ -141,6 +141,10 @@ function startGame(err) {
 
   class Start extends GameObject {
     start = true;
+
+    drawForeground(g) {
+      g.drawCenteredImage(images.test, this.position.x, this.position.y);
+    }
   }
 
   class Player extends GameObject {

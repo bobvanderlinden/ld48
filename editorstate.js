@@ -1,132 +1,148 @@
-const items = [Start];
-let item = items[0];
-let leveldef = [];
+"use strict";
+import Vector from "./vector.js";
 
-function editorState() {
-  const me = {
-    enable,
-    disable,
-  };
+class EditorState {
+  items = [];
+  item = null;
+  leveldef = [];
+  constructor({ game, items, gameplayState }) {
+    this.game = game;
+    this.items = items;
+    this.item = items[0];
+    this.gameplayState = gameplayState;
 
-  function enable() {
+    this.draw = this.draw.bind(this);
+    this.mousedown = this.mousedown.bind(this);
+    this.keydown = this.keydown.bind(this);
+    this.update = this.update.bind(this);
+  }
+  enable() {
     console.log("enable editor");
-    game.chains.draw.push(draw);
-    g.on("mousedown", mousedown);
-    g.on("keydown", keydown);
-    g.chains.update.push(update);
-    g.chains.update.remove(game.chains.update.camera);
-    g.chains.update.remove(game.chains.update.objects);
+    this.game.chains.draw.push(this.draw);
+    this.game.on("mousedown", this.mousedown);
+    this.game.on("keydown", this.keydown);
+    this.game.chains.update.push(this.update);
+    this.game.chains.update.remove(this.game.chains.update.camera);
+    this.game.chains.update.remove(this.game.chains.update.objects);
   }
 
-  function disable() {
+  disable() {
     console.log("disable editor");
-    game.chains.draw.remove(draw);
-    g.removeListener("mousedown", mousedown);
-    g.removeListener("keydown", keydown);
-    g.chains.update.remove(update);
-    g.chains.update.push(game.chains.update.camera);
-    g.chains.update.push(game.chains.update.objects);
+    this.game.chains.draw.remove(this.draw);
+    this.game.removeListener("mousedown", this.mousedown);
+    this.game.removeListener("keydown", this.keydown);
+    this.game.chains.update.remove(this.update);
+    this.game.chains.update.push(this.game.chains.update.camera);
+    this.game.chains.update.push(this.game.chains.update.objects);
   }
 
-  function update(dt, next) {
+  update(dt, next) {
     const movement = new Vector(
-      (game.keys.right ? 1 : 0) - (game.keys.left ? 1 : 0),
-      (game.keys.up ? 1 : 0) - (game.keys.down ? 1 : 0)
+      (this.game.keys.right ? 1 : 0) - (this.game.keys.left ? 1 : 0),
+      (this.game.keys.up ? 1 : 0) - (this.game.keys.down ? 1 : 0)
     );
-    game.camera.x += movement.x * dt * 10;
-    game.camera.y += movement.y * dt * 10;
-    game.objects.handlePending();
+    this.game.camera.x += movement.x * dt * 10;
+    this.game.camera.y += movement.y * dt * 10;
+    this.game.objects.handlePending();
     next(dt);
   }
 
-  function createLevel() {
+  createLevel() {
     return {
       name: "level",
-      objects: leveldef.map(
+      objects: this.leveldef.map(
         ([item, x, y]) =>
           new item({
             x,
             y,
           })
       ),
-      clone: createLevel,
-      nextLevel: createLevel,
+      clone: this.createLevel.bind(this),
+      nextLevel: this.createLevel.bind(this),
     };
   }
 
-  function getPosition() {
+  getPosition() {
     var tmp = new Vector();
-    game.camera.screenToWorld(game.mouse, tmp);
+    this.game.camera.screenToWorld(this.game.mouse, tmp);
     tmp.x = Math.round(tmp.x);
     tmp.y = Math.round(tmp.y);
     return tmp;
   }
 
-  function place() {
-    var p = getPosition();
-    leveldef.push([item, p.x, p.y]);
-    game.objects.add(
-      new item({
+  place() {
+    var p = this.getPosition();
+    this.leveldef.push([this.item, p.x, p.y]);
+    this.game.objects.add(
+      new this.item({
         x: p.x,
         y: p.y,
       })
     );
   }
 
-  function deleteItem() {
-    var p = getPosition();
-    const obj = getCell(p.x, p.y);
+  deleteItem() {
+    var p = this.getPosition();
+    const obj = this.getCell(p.x, p.y);
     obj.forEach((o) => o.destroy());
-    leveldef = leveldef.filter(([_, x, y]) => x !== p.x || y !== p.y);
+    this.leveldef = this.leveldef.filter(([, x, y]) => x !== p.x || y !== p.y);
   }
 
-  function load() {
-    leveldef = [];
-    for (const obj of game.objects.lists.export) {
-      leveldef.push([obj.constructor, obj.position.x, obj.position.y]);
+  load() {
+    this.leveldef = [];
+    for (const obj of this.game.objects.lists.export) {
+      this.leveldef.push([obj.constructor, obj.position.x, obj.position.y]);
     }
   }
 
-  function save() {
-    let str = leveldef
+  save() {
+    let str = this.leveldef
       .map(([item, x, y]) => `new ${item.name}({ x: ${x}, y: ${y}}),`)
       .join("\n");
-    str += "\nnew Start({ x: 2, y: -1 })";
-    console.log(str);
+    str += "\nnew Start({ x: 0, y: 0 })";
+    window.navigator.clipboard.writeText(str).then(() => {
+      console.log("level copied to clipboard");
+    });
   }
 
-  function mousedown(button) {
+  mousedown(button) {
     if (button === 0) {
-      place();
+      this.place();
     } else if (button === 2) {
-      deleteItem();
+      this.deleteItem();
     }
   }
 
-  function keydown(key) {
+  keydown(key) {
     if (key === "p") {
-      save();
+      this.save();
     } else if (key === "i") {
-      load();
+      this.load();
     } else if (key === "e") {
-      game.changeState(new GameplayState());
+      this.game.changeState(this.gameplayState);
     } else if (key === "r") {
-      game.changeLevel(createLevel());
+      this.game.changeLevel(this.createLevel());
     }
 
     var d = (key === "]" ? 1 : 0) - (key === "[" ? 1 : 0);
-    item = items[(items.indexOf(item) + d + items.length) % items.length];
+    this.item = this.items[
+      (this.items.indexOf(this.item) + d + this.items.length) %
+        this.items.length
+    ];
   }
 
-  function draw(g, next) {
+  draw(g, next) {
     next(g);
-    for (const o of game.objects.lists.editorVisible) {
+    for (const o of this.game.objects.lists.editorVisible) {
       o.drawForeground(g);
     }
     const leftTop = new Vector();
-    game.camera.screenToWorld(Vector.zero, leftTop);
+    this.game.camera.screenToWorld(Vector.zero, leftTop);
     const rightBottom = new Vector();
-    game.camera.screenToWorld(new Vector(game.width, game.height), rightBottom);
+    this.game.camera.screenToWorld(
+      new Vector(this.game.width, this.game.height),
+      rightBottom
+    );
     leftTop.x = Math.floor(leftTop.x);
     leftTop.y = Math.floor(leftTop.y);
     rightBottom.x = Math.ceil(rightBottom.x);
@@ -134,34 +150,30 @@ function editorState() {
     g.context.globalAlpha = 0.1;
     g.strokeStyle("black");
 
-    for (let x = leftTop.x; x < rightBottom.x; x++) {
-      g.strokeLine(x - 0.5, leftTop.y, x - 0.5, rightBottom.y);
-    }
-
-    for (let y = leftTop.y; y < rightBottom.y; y++) {
-      g.strokeLine(leftTop.x, y - 0.5, rightBottom.x, y - 0.5);
-    }
-
     g.context.globalAlpha = 1;
-    var p = getPosition();
+    var p = this.getPosition();
     g.fillStyle("black");
     g.fillCircle(p.x, p.y, 0.1);
 
-    if (item) {
+    if (this.item) {
       g.context.globalAlpha = 0.5;
-      item.prototype.drawForeground.call(
+      this.item.prototype.drawForeground.call(
         {
           position: {
             x: p.x,
             y: p.y,
           },
-          tile: item.tile,
+          velocity: {
+            x: 0,
+            y: 0,
+          },
+          image: this.item.image,
         },
         g
       );
       g.context.globalAlpha = 1;
     }
   }
-
-  return me;
 }
+
+export default EditorState;
