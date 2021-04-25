@@ -296,7 +296,6 @@ function startGame(err) {
       g.save();
       g.context.translate(this.position.x, this.position.y);
       g.context.scale(this.velocity.x < 0 ? 1 : -1, 1);
-      console.log(this.velocity.angle());
       g.context.rotate(
         this.velocity.x < 0
           ? this.velocity.angle() + Math.PI
