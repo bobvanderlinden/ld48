@@ -15,7 +15,14 @@ import Mouse from "./mouse.js";
 import EditorState from "./editorstate.js";
 
 var rs = {
-  audio: ["test", "ambient", "sploosh", "fish_dead", "treasure_found"],
+  audio: [
+    "test",
+    "ambient",
+    "sploosh",
+    "fish_dead",
+    "sonar_2",
+    "treasure_found",
+  ],
   images: [
     "test",
     "clown",
@@ -666,6 +673,7 @@ function startGame(err) {
       this.player = player;
       this.update = this.update.bind(this);
       this.keydown = this.keydown.bind(this);
+      this.pingtime = Math.floor(Math.random() * 15);
     }
 
     enable() {
@@ -719,6 +727,12 @@ function startGame(err) {
     }
 
     update(dt) {
+      this.pingtime -= dt;
+      if (this.pingtime < 0) {
+        game.resources.audio.sonar_2.play();
+        this.pingtime = Math.floor(Math.random() * 15);
+      }
+
       this.game.camera.screenToWorld(
         this.game.mouse,
         this.player.targetPosition
