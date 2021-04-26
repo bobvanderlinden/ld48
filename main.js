@@ -34,6 +34,8 @@ var rs = {
     "air",
     "begin",
     "end",
+    "starfish",
+    "jelly",
   ],
 };
 var g, game;
@@ -256,6 +258,7 @@ function startGame(err) {
       this.image = image;
       this.size = { width: 1, height: 1 };
       this.boundaries = new Boundaries(top, right, bottom, left);
+      this.speed = speed;
       this.velocity = this.angleAndSpeedtoVector(angle, speed);
     }
 
@@ -339,17 +342,17 @@ function startGame(err) {
   }
 
   class Octopus extends Fish {
-    constructor({ x, y, angle, speed }) {
+    constructor({ x, y, angle, speed, top, right, bottom, left }) {
       super({
         x,
         y,
         image: images.octopus_0,
         angle: angle ?? 15,
         speed: speed ?? 300,
-        top: -200,
-        left: -200,
-        bottom: 200,
-        right: 200,
+        top: top ?? -200,
+        right: right ?? 200,
+        bottom: bottom ?? 200,
+        left: left ?? -200,
       });
       this.frame = 0;
     }
@@ -383,7 +386,6 @@ function startGame(err) {
   }
 
   class Seahorse extends Fish {
-    //TODO: give rect collision please :)
     constructor({ x, y, angle, speed }) {
       super({
         x,
@@ -392,9 +394,9 @@ function startGame(err) {
         angle: angle ?? 0,
         speed: speed ?? 200,
         top: 0,
-        right: 1400,
+        right: 1200 - x + 10,
         bottom: 0,
-        left: -1400,
+        left: -1200 - x - 10,
       });
     }
     update(dt) {
@@ -449,7 +451,47 @@ function startGame(err) {
       g.context.translate(this.position.x, this.position.y);
       g.context.rotate(this.velocity.angle());
       g.context.scale(this.direction, this.direction);
-      g.drawCenteredImage(images.clown, 0, 0);
+      g.drawCenteredImage(images.jelly, 0, 0);
+      g.restore();
+    }
+  }
+
+  class StarFish extends Fish {
+    constructor({ x, y, angle, speed }) {
+      super({
+        x,
+        y,
+        image: images.starfish,
+        angle: angle ?? 0,
+        speed: speed ?? 200,
+        top: 0,
+        right: 1024 - x + 10,
+        bottom: 0,
+        left: -1024 - x - 10,
+      });
+    }
+    update(dt) {
+      let velocity = this.velocity.clone();
+      this.relativePosition.addV(velocity.multiply(dt));
+
+      if (this.relativePosition.x > this.boundaries.right) {
+        this.relativePosition.x = this.boundaries.left;
+      }
+      this.position = this.startPosition.clone().addV(this.relativePosition);
+    }
+    drawForeground(g) {
+      g.save();
+      g.context.translate(this.position.x, this.position.y);
+      g.context.scale(1, 1);
+      g.context.rotate(
+        toRadians(
+          (360 /
+            (this.speed -
+              (this.boundaries.right - Math.abs(this.relativePosition.x)))) *
+            this.relativePosition.x
+        )
+      );
+      g.drawCenteredImage(this.image, 0, 0);
       g.restore();
     }
   }
@@ -775,11 +817,11 @@ function startGame(err) {
       name: "Level 2",
       objects: [
         new WavyFish({ x: 500, y: 1000 }),
-        new ClownFish({ x: 300, y: 1000 }),
         new Octopus({ x: 60, y: 2000 }),
         new FootballFish({ x: 80, y: 3000 }),
         new Seahorse({ x: 200, y: 4000 }),
-        new Treasure({ x: 0, y: 4500 }),
+        new StarFish({ x: 80, y: 5000 }),
+        new Treasure({ x: 0, y: 5500 }),
       ],
       clone: level_sym2,
       nextLevel: level_sym3,
@@ -790,17 +832,74 @@ function startGame(err) {
     return {
       name: "Level 3",
       objects: [
-        new Treasure({ x: -24, y: 9812 }),
-        new Seahorse({ x: 790, y: 8310, angle: 180 }),
-        new Seahorse({ x: -653, y: 7275 }),
-        new FootballFish({ x: 441, y: 5297 }),
-        new FootballFish({ x: 627, y: 5522 }),
-        new FootballFish({ x: -459, y: 3313, angle: 315 }),
-        new FootballFish({ x: -699, y: 3577, angle: 315 }),
-        new Octopus({ x: 674, y: 2157 }),
-        new Octopus({ x: -521, y: 1148, angle: 345 }),
+        new Treasure({ x: -24, y: 6512 }),
+        new Seahorse({ x: 790, y: 5710 }),
+        new Seahorse({ x: -653, y: 5275 }),
+        new FootballFish({ x: 441, y: 3797 }),
+        new FootballFish({ x: 627, y: 4022 }),
+        new FootballFish({ x: -459, y: 2813, angle: 315 }),
+        new FootballFish({ x: -699, y: 3077, angle: 315 }),
+        new Octopus({
+          x: 674,
+          y: 1500,
+          top: -400,
+          right: 400,
+          bottom: 400,
+          left: -400,
+        }),
+        new Octopus({ x: -521, y: 1000, angle: 345 }),
       ],
       clone: level_sym3,
+      nextLevel: level_sym4,
+    };
+  }
+
+  function level_sym4() {
+    return {
+      name: "Level 4",
+      objects: [
+        new Treasure({ x: -200, y: 10352 }),
+        new Octopus({
+          x: 588,
+          y: 9610,
+          angle: 330,
+          speed: 600,
+          top: -400,
+          right: 400,
+          bottom: 400,
+          left: -400,
+        }),
+        new Octopus({ x: -235, y: 9285 }),
+        new WavyFish({ x: -290, y: 7976 }),
+        new StarFish({ x: 10, y: 7871 }),
+        new FootballFish({ x: -176, y: 7604 }),
+        new StarFish({ x: 540, y: 7335, speed: 400 }),
+        new StarFish({ x: -625, y: 5994 }),
+        new Seahorse({ x: 660, y: 5058, speed: 350 }),
+        new Octopus({
+          x: -706,
+          y: 4101,
+          top: -400,
+          right: 400,
+          bottom: 400,
+          left: -400,
+        }),
+        new Octopus({
+          x: 806,
+          y: 3805,
+          top: -400,
+          right: 400,
+          bottom: 400,
+          left: -400,
+        }),
+        new WavyFish({ x: 883, y: 2128 }),
+        new WavyFish({ x: 383, y: 2768 }),
+        new WavyFish({ x: -396, y: 2128 }),
+        new StarFish({ x: 355, y: 1481 }),
+        new StarFish({ x: -777, y: 875 }),
+        new StarFish({ x: 777, y: 875 }),
+      ],
+      clone: level_sym4,
       nextLevel: null,
     };
   }
