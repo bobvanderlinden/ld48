@@ -473,7 +473,7 @@ function startGame(err) {
     }
   }
 
-  class WavyFish extends GameObject {
+  class WavyFish extends Fish {
     touchable = true;
     updatable = true;
     foreground = true;
