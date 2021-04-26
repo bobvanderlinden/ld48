@@ -30,6 +30,7 @@ var rs = {
     "lost",
     "won",
     "background",
+    "background_2",
     "air",
   ],
 };
@@ -94,14 +95,13 @@ function startGame(err) {
   game.chains.draw.push((g, next) => {
     g.save();
     g.context.translate(-1024, 0);
-    g.context.scale(5, 5);
 
     g.context.fillStyle = "#0fb0fe";
     g.context.fillRect(0, 0, 2048, 9999999);
 
     if (!game.backgroundPattern) {
       game.backgroundPattern = g.context.createPattern(
-        images.background,
+        images.background_2,
         "repeat"
       );
     }
@@ -111,7 +111,6 @@ function startGame(err) {
     if (!game.bubblesPattern) {
       game.bubblesPattern = g.context.createPattern(images.bubbles, "repeat");
     }
-    g.context.scale(0.2, 0.2);
     g.save();
     g.context.translate(0, (game.time * -200) % images["bubbles"].height);
     g.context.fillStyle = game.bubblesPattern;
