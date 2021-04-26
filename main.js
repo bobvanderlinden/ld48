@@ -146,6 +146,8 @@ function startGame(err) {
 
   class Start extends GameObject {
     start = true;
+    export = true;
+    editorVisible = true;
 
     drawForeground(g) {
       g.drawCenteredImage(images.test, this.position.x, this.position.y);
@@ -231,6 +233,7 @@ function startGame(err) {
     updatable = true;
     foreground = true;
     touchable = true;
+    export = true;
     touchRadius = 100;
 
     constructor({
@@ -450,6 +453,7 @@ function startGame(err) {
 
   class Treasure extends GameObject {
     end = true;
+    export = true;
     background = true;
     constructor({ x, y }) {
       super({ x, y });

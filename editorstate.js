@@ -99,7 +99,6 @@ class EditorState {
     let str = this.leveldef
       .map(([item, x, y]) => `new ${item.name}({ x: ${x}, y: ${y}}),`)
       .join("\n");
-    str += "\nnew Start({ x: 0, y: 0 })";
     window.navigator.clipboard.writeText(str).then(() => {
       console.log("level copied to clipboard");
     });
@@ -157,20 +156,7 @@ class EditorState {
 
     if (this.item) {
       g.context.globalAlpha = 0.5;
-      this.item.prototype.drawForeground.call(
-        {
-          position: {
-            x: p.x,
-            y: p.y,
-          },
-          velocity: {
-            x: 0,
-            y: 0,
-          },
-          image: this.item.image,
-        },
-        g
-      );
+      new this.item({ x: p.x, y: p.y }).drawForeground(g);
       g.context.globalAlpha = 1;
     }
   }
