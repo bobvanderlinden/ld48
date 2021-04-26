@@ -4,7 +4,6 @@ import Game from "./game.js";
 import Vector from "./vector.js";
 import state from "./state.js";
 import LevelSystem from "./levelsystem.js";
-import mouse from "./mouse.js";
 import collision from "./collision.js";
 import keyboard from "./keyboard.js";
 import quake from "./quake.js";
@@ -65,7 +64,7 @@ function startGame(err) {
   }
 
   var images = g.resources.images;
-  var audio = g.resources.audio;
+  // var audio = g.resources.audio;
   g.objects.lists.collidable = g.objects.createIndexList("collidable");
   g.objects.lists.start = g.objects.createIndexList("start");
   g.objects.lists.shadow = g.objects.createIndexList("shadow");
@@ -76,9 +75,9 @@ function startGame(err) {
   g.objects.lists.end = g.objects.createIndexList("end");
   g.objects.lists.editorVisible = g.objects.createIndexList("editorVisible");
 
-  function pickRandom(arr) {
-    return arr[(arr.length * Math.random()) | 0];
-  }
+  // function pickRandom(arr) {
+  //   return arr[(arr.length * Math.random()) | 0];
+  // }
 
   // Auto-refresh
   game.autoRefresh = new AutoRefresh({ game });
@@ -468,15 +467,15 @@ function startGame(err) {
 
   // draw responsive image which keeps to canvas boundaries
 
-  function drawOverlayImage(g, image) {
-    g.save();
-    const scaleX = game.width / image.width;
-    const scaleY = game.height / image.height;
-    const scale = Math.min(scaleX, scaleY);
-    g.context.scale(scale, scale);
-    g.drawCenteredImage(image, game.width / 2 / scale, game.height / 2 / scale);
-    g.restore();
-  }
+  // function drawOverlayImage(g, image) {
+  //   g.save();
+  //   const scaleX = game.width / image.width;
+  //   const scaleY = game.height / image.height;
+  //   const scale = Math.min(scaleX, scaleY);
+  //   g.context.scale(scale, scale);
+  //   g.drawCenteredImage(image, game.width / 2 / scale, game.height / 2 / scale);
+  //   g.restore();
+  // }
 
   class GameplayState {
     constructor({ game }) {
@@ -547,7 +546,7 @@ function startGame(err) {
       this.player.movement = movement;
     }
 
-    update(dt) {
+    update() {
       this.game.camera.screenToWorld(
         this.game.mouse,
         this.player.targetPosition
@@ -703,7 +702,7 @@ function startGame(err) {
       game.changeState(new GameplayState({ game }));
     }
 
-    update(dt, next) {
+    update(/*dt, next*/) {
       // Avoid updating the game.
       //
     }
@@ -744,7 +743,7 @@ function startGame(err) {
       game.changeState(new GameplayState({ game }));
     }
 
-    update(dt, next) {
+    update(/*dt, next*/) {
       // Avoid updating the game.
       //
     }
