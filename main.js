@@ -15,7 +15,7 @@ import Mouse from "./mouse.js";
 import EditorState from "./editorstate.js";
 
 var rs = {
-  audio: ["test", "ambient", "sploosh"],
+  audio: ["test", "ambient", "sploosh", "fish_dead", "treasure_found"],
   images: [
     "test",
     "clown",
@@ -687,6 +687,7 @@ function startGame(err) {
       // Check win condition
       if (this.player.position.y > end.position.y) {
         end.open();
+        this.game.resources.audio.treasure_found.play();
         this.player.sinkRate = 0;
         this.game.changeState(
           this.game.levelSystem.hasNextLevel()
@@ -1003,6 +1004,8 @@ function startGame(err) {
       g.chains.draw.unshift(this.draw);
       g.chains.update.unshift(this.update);
       g.on("mousedown", this.mousedown);
+
+      game.resources.audio.fish_dead.play();
     }
 
     disable() {
