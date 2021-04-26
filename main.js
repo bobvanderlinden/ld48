@@ -34,6 +34,7 @@ var rs = {
     "air",
     "begin",
     "end",
+    "starfish",
   ],
 };
 var g, game;
@@ -256,6 +257,7 @@ function startGame(err) {
       this.image = image;
       this.size = { width: 1, height: 1 };
       this.boundaries = new Boundaries(top, right, bottom, left);
+      this.speed = speed;
       this.velocity = this.angleAndSpeedtoVector(angle, speed);
     }
 
@@ -383,7 +385,6 @@ function startGame(err) {
   }
 
   class Seahorse extends Fish {
-    //TODO: give rect collision please :)
     constructor({ x, y, angle, speed }) {
       super({
         x,
@@ -392,9 +393,9 @@ function startGame(err) {
         angle: angle ?? 0,
         speed: speed ?? 200,
         top: 0,
-        right: 1400,
+        right: 1200 - x + 10,
         bottom: 0,
-        left: -1400,
+        left: -1200 - x - 10,
       });
     }
     update(dt) {
@@ -450,6 +451,46 @@ function startGame(err) {
       g.context.rotate(this.velocity.angle());
       g.context.scale(this.direction, this.direction);
       g.drawCenteredImage(images.clown, 0, 0);
+      g.restore();
+    }
+  }
+
+  class StarFish extends Fish {
+    constructor({ x, y, angle, speed }) {
+      super({
+        x,
+        y,
+        image: images.starfish,
+        angle: angle ?? 0,
+        speed: speed ?? 200,
+        top: 0,
+        right: 1024 - x + 10,
+        bottom: 0,
+        left: -1024 - x - 10,
+      });
+    }
+    update(dt) {
+      let velocity = this.velocity.clone();
+      this.relativePosition.addV(velocity.multiply(dt));
+
+      if (this.relativePosition.x > this.boundaries.right) {
+        this.relativePosition.x = this.boundaries.left;
+      }
+      this.position = this.startPosition.clone().addV(this.relativePosition);
+    }
+    drawForeground(g) {
+      g.save();
+      g.context.translate(this.position.x, this.position.y);
+      g.context.scale(1, 1);
+      g.context.rotate(
+        toRadians(
+          (360 /
+            (this.speed -
+              (this.boundaries.right - Math.abs(this.relativePosition.x)))) *
+            this.relativePosition.x
+        )
+      );
+      g.drawCenteredImage(this.image, 0, 0);
       g.restore();
     }
   }
