@@ -15,7 +15,7 @@ import Mouse from "./mouse.js";
 import EditorState from "./editorstate.js";
 
 var rs = {
-  audio: ["test"],
+  audio: ["test", "ambient", "sploosh"],
   images: [
     "test",
     "clown",
@@ -472,45 +472,78 @@ function startGame(err) {
     }
   }
 
-  class GameplayState {
+  function fade({ current, target, speed }) {
+    const difference = target - current;
+    const direction = Math.sign(difference);
+    const distance = Math.abs(difference);
+    const step = Math.min(speed, distance);
+    return current + direction * step;
+  }
+
+  function fadeAudio({ audio, target, speed }) {
+    audio.volume = fade({
+      current: audio.volume,
+      target,
+      speed,
+    });
+  }
+
+  class BeginState {
     constructor({ game }) {
       this.game = game;
       this.update = this.update.bind(this);
+    }
+
+    enable() {
+      this.game.camera.reset();
+      this.game.chains.update.unshift(this.update);
+      this.player = new Player({
+        x: 0,
+        y: -2048,
+      });
+      this.game.objects.add(this.player);
+      this.game.objects.handlePending();
+    }
+
+    disable() {
+      this.game.chains.update.remove(this.update);
+    }
+
+    update(dt, next) {
+      this.player.velocity.y += 2048 * dt;
+      this.player.position.y += this.player.velocity.y * dt;
+
+      if (this.player.position.y > 0) {
+        this.player.velocity.set(0, 0);
+        this.game.resources.audio.sploosh.play();
+        this.game.changeState(
+          new GameplayState({ game: this.game, player: this.player })
+        );
+      }
+    }
+  }
+
+  class GameplayState {
+    constructor({ game, player }) {
+      this.game = game;
+      this.player = player;
+      this.update = this.update.bind(this);
       this.keydown = this.keydown.bind(this);
-      this.levelchanged = this.levelchanged.bind(this);
     }
 
     enable() {
       this.game.camera.reset();
       this.game.chains.update.push(this.update);
       this.game.on("keydown", this.keydown);
-      this.game.on("levelchanged", this.levelchanged);
 
-      const start = game.objects.lists.start.first;
-      if (this.start !== start) {
-        this.spawnPlayer(start);
-      }
+      game.resources.audio.ambient.loop = true;
+      game.resources.audio.ambient.volume = 0;
+      game.resources.audio.ambient.play();
     }
 
     disable() {
       this.game.chains.update.remove(this.update);
       this.game.removeListener("keydown", this.keydown);
-      this.game.removeListener("levelchanged", this.levelchanged);
-    }
-
-    levelchanged() {
-      const start = game.objects.lists.start.first;
-      this.spawnPlayer(start);
-    }
-
-    spawnPlayer(start) {
-      this.start = start;
-      const player = new Player({
-        x: start.position.x,
-        y: start.position.y,
-      });
-      this.player = player;
-      game.objects.add(player);
     }
 
     keydown(key) {
@@ -543,7 +576,12 @@ function startGame(err) {
       this.player.movement = movement;
     }
 
-    update() {
+    update(dt) {
+      fadeAudio({
+        audio: game.resources.audio.ambient,
+        target: 1,
+        speed: (1 / 10) * dt,
+      });
       this.game.camera.screenToWorld(
         this.game.mouse,
         this.player.targetPosition
@@ -589,7 +627,7 @@ function startGame(err) {
 
     mousedown() {
       this.game.levelSystem.changeLevel(level_sym1());
-      this.game.changeState(new GameplayState({ game: this.game }));
+      this.game.changeState(new BeginState({ game: this.game }));
     }
 
     draw(g, next) {
@@ -655,7 +693,6 @@ function startGame(err) {
     return {
       name: "Level 1",
       objects: [
-        new Start({ x: 0, y: 0 }),
         new ClownFish({
           x: 300,
           y: 800,
@@ -737,7 +774,6 @@ function startGame(err) {
     return {
       name: "Level 2",
       objects: [
-        new Start({ x: 0, y: 0 }),
         new WavyFish({ x: 500, y: 1000 }),
         new ClownFish({ x: 300, y: 1000 }),
         new Octopus({ x: 60, y: 2000 }),
@@ -754,7 +790,6 @@ function startGame(err) {
     return {
       name: "Level 3",
       objects: [
-        new Start({ x: 0, y: 0 }),
         new Treasure({ x: -24, y: 9812 }),
         new Seahorse({ x: 790, y: 8310, angle: 180 }),
         new Seahorse({ x: -653, y: 7275 }),
@@ -801,7 +836,7 @@ function startGame(err) {
 
     mousedown() {
       game.levelSystem.nextLevel();
-      game.changeState(new GameplayState({ game }));
+      game.changeState(new BeginState({ game }));
     }
 
     update(/*dt, next*/) {
@@ -842,7 +877,7 @@ function startGame(err) {
 
     mousedown() {
       game.levelSystem.restartLevel();
-      game.changeState(new GameplayState({ game }));
+      game.changeState(new BeginState({ game }));
     }
 
     update(/*dt, next*/) {
