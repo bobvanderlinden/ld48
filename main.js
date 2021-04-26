@@ -456,8 +456,8 @@ function startGame(err) {
     end = true;
     export = true;
     background = true;
-    constructor({ x, y }) {
-      super({ x, y });
+    constructor({ y }) {
+      super({ x: 0, y });
       this.image = images["treasure"];
     }
 
@@ -538,7 +538,7 @@ function startGame(err) {
           new EditorState({
             game,
             gameplayState: this,
-            items: [Start, ClownFish],
+            items: [Start, ClownFish, Octopus, FootballFish, Treasure],
           })
         );
       }

@@ -167,7 +167,13 @@ class EditorState {
 
     if (this.item) {
       g.context.globalAlpha = 0.5;
-      new this.item({ x: p.x, y: p.y }).drawForeground(g);
+      const tmp = new this.item({ x: p.x, y: p.y });
+      if (tmp.drawBackground) {
+        tmp.drawBackground(g);
+      }
+      if (tmp.drawForeground) {
+        tmp.drawForeground(g);
+      }
       g.context.globalAlpha = 1;
     }
   }
