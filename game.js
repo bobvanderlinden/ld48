@@ -51,7 +51,7 @@ function Game(start, canvas, components) {
   );
 
   this.canvas = canvas;
-  this.graphics = new Graphics(canvas.getContext("2d"));
+  this.graphics = new Graphics(canvas.getContext("2d", { alpha: false }));
   this.time = 0;
 
   var componentsLoaded = 0;
