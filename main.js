@@ -38,6 +38,11 @@ var rs = {
     "starfish",
     "jelly",
     "white_bubble",
+    "splash_1",
+    "splash_2",
+    "splash_3",
+    "splash_4",
+    "splash_5",
   ],
 };
 var g, game;
@@ -247,6 +252,35 @@ function startGame(err) {
       }
     }
   }
+
+  class Splash extends GameObject {
+    updatable = true;
+    background = true;
+    lifetime = 0;
+    framerate = 1 / 30;
+    images = [
+      game.resources.images.splash_1,
+      game.resources.images.splash_2,
+      game.resources.images.splash_3,
+      game.resources.images.splash_4,
+      game.resources.images.splash_5,
+    ];
+    update(dt) {
+      this.lifetime += dt;
+      if (this.lifetime > images.length * this.framerate) {
+        game.objects.remove(this);
+      }
+    }
+
+    drawBackground(g) {
+      const maxLifetime = this.framerate * this.images.length;
+      const image = this.images[Math.floor(this.lifetime / this.framerate)];
+      g.context.globalAlpha = 1 - this.lifetime / maxLifetime;
+      g.drawCenteredImage(image, this.position.x, this.position.y - 600);
+      g.context.globalAlpha = 1;
+    }
+  }
+
   class Fish extends GameObject {
     updatable = true;
     foreground = true;
@@ -616,6 +650,9 @@ function startGame(err) {
       if (this.player.position.y > 0) {
         this.player.velocity.set(0, 0);
         this.game.resources.audio.sploosh.play();
+        this.game.objects.add(
+          new Splash({ x: this.player.position.x, y: this.player.position.y })
+        );
         this.game.changeState(
           new GameplayState({ game: this.game, player: this.player })
         );
