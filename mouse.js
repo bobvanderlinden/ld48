@@ -13,9 +13,9 @@ class Mouse extends Vector {
     this.mousewheel = this.mousewheel.bind(this);
     this.DOMMouseScroll = this.DOMMouseScroll.bind(this);
 
-    this.game.canvas.addEventListener("mouseup", this.mouseup, true);
-    this.game.canvas.addEventListener("mousedown", this.mousedown, true);
-    this.game.canvas.addEventListener("mousemove", this.mousemove, true);
+    this.game.canvas.addEventListener("pointerup", this.mouseup, true);
+    this.game.canvas.addEventListener("pointerdown", this.mousedown, true);
+    this.game.canvas.addEventListener("pointermove", this.mousemove, true);
     this.game.canvas.addEventListener("mousewheel", this.mousewheel, true);
     this.game.canvas.addEventListener(
       "DOMMouseScroll",
