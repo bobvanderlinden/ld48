@@ -841,7 +841,6 @@ function startGame(err) {
         new StarFish({ x: 540, y: 7335, speed: 400 }),
         new StarFish({ x: -625, y: 5994 }),
         new Seahorse({ x: 660, y: 5058, speed: 350 }),
-        new ClownFish({ x: 765, y: 4772 }),
         new Octopus({
           x: -706,
           y: 4101,
