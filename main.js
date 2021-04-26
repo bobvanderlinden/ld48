@@ -142,6 +142,17 @@ function startGame(err) {
     });
   })();
 
+  let ambientVolume = 0;
+  game.resources.audio.ambient.volume = 0;
+  game.chains.update.unshift((dt, next) => {
+    fadeAudio({
+      audio: game.resources.audio.ambient,
+      target: ambientVolume,
+      speed: (1 / 10) * dt,
+    });
+    next(dt);
+  });
+
   //#gameobjects
 
   class GameObject {
@@ -562,16 +573,19 @@ function startGame(err) {
     const difference = target - current;
     const direction = Math.sign(difference);
     const distance = Math.abs(difference);
-    const step = Math.min(speed, distance);
-    return current + direction * step;
+    if (speed > distance) {
+      return target;
+    }
+    return current + direction * speed;
   }
 
   function fadeAudio({ audio, target, speed }) {
-    audio.volume = fade({
+    const volume = fade({
       current: audio.volume,
       target,
       speed,
     });
+    audio.volume = volume;
   }
 
   class BeginState {
@@ -625,9 +639,11 @@ function startGame(err) {
       game.resources.audio.ambient.loop = true;
       game.resources.audio.ambient.volume = 0;
       game.resources.audio.ambient.play();
+      ambientVolume = 1;
     }
 
     disable() {
+      ambientVolume = 0;
       this.game.chains.update.remove(this.update);
       this.game.removeListener("keydown", this.keydown);
     }
@@ -666,11 +682,6 @@ function startGame(err) {
     }
 
     update(dt) {
-      fadeAudio({
-        audio: game.resources.audio.ambient,
-        target: 1,
-        speed: (1 / 10) * dt,
-      });
       this.game.camera.screenToWorld(
         this.game.mouse,
         this.player.targetPosition
@@ -1002,7 +1013,7 @@ function startGame(err) {
 
     enable() {
       g.chains.draw.unshift(this.draw);
-      g.chains.update.unshift(this.update);
+      g.chains.update.insertBefore(this.update, game.chains.update.objects);
       g.on("mousedown", this.mousedown);
 
       game.resources.audio.fish_dead.play();
@@ -1030,7 +1041,7 @@ function startGame(err) {
       game.changeState(new BeginState({ game }));
     }
 
-    update(/*dt, next*/) {
+    update(dt, next) {
       // Avoid updating the game.
       //
     }
