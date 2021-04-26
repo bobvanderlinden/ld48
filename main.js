@@ -220,10 +220,10 @@ function startGame(err) {
         console.error("top should be negative of zero");
       }
       if (left > 0) {
-        console.error("top should be negative of zero");
+        console.error("left should be negative of zero");
       }
       if (bottom < 0) {
-        console.error("top should be positive of zero");
+        console.error("bottom should be positive of zero");
       }
       if (right < 0) {
         console.error("right should be positive of zero");
@@ -300,8 +300,8 @@ function startGame(err) {
         speed: 200,
         top: -100,
         bottom: 100,
-        left: 800,
-        right: -800,
+        left: -800,
+        right: 800,
       });
     }
     update(dt) {
@@ -345,9 +345,9 @@ function startGame(err) {
         angle: 15,
         speed: 300,
         top: -200,
-        left: 200,
+        left: -200,
         bottom: 200,
-        right: -200,
+        right: 200,
       });
       this.frame = 0;
     }
@@ -662,10 +662,10 @@ function startGame(err) {
       objects: [
         new Start({ x: 0, y: 0 }),
         new WavyFish({ x: 500, y: 1000 }),
-        new ClownFish(300, 1000),
-        new Octopus(60, 2000),
-        new FootballFish(80, 3000),
-        new Seahorse(200, 4000),
+        new ClownFish({ x: 300, y: 1000 }),
+        new Octopus({ x: 60, y: 2000 }),
+        new FootballFish({ x: 80, y: 3000 }),
+        new Seahorse({ x: 200, y: 4000 }),
         new Treasure({ x: 0, y: 4500 }),
       ],
       clone: level_sym2,
