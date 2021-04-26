@@ -25,6 +25,7 @@ var rs = {
     "octopus_2",
     "football",
     "treasure",
+    "treasure_closed",
     "seahorse",
     "bubbles",
     "lost",
@@ -36,6 +37,7 @@ var rs = {
     "end",
     "starfish",
     "jelly",
+    "white_bubble",
   ],
 };
 var g, game;
@@ -496,13 +498,42 @@ function startGame(err) {
     }
   }
 
+  class Bubble extends GameObject {
+    updatable = true;
+    foreground = true;
+
+    constructor({ x, y }) {
+      super({ x, y });
+      this.velocity = new Vector(0, -(300 + 300 * Math.random()));
+      this.period = 8 + Math.random() * 4;
+      this.lifetime = Math.random() * this.period;
+      this.scale = 0.5 * Math.random() + 0.5;
+    }
+
+    update(dt) {
+      this.lifetime += dt;
+      this.velocity.x =
+        Math.sin((this.lifetime / (Math.PI * 2)) * this.period) * 100;
+      this.velocity.y -= 500 * dt;
+      this.position.addV(this.velocity.clone().multiply(dt));
+    }
+
+    drawForeground(g) {
+      g.save();
+      g.context.translate(this.position.x, this.position.y);
+      g.context.scale(this.scale, this.scale);
+      g.drawCenteredImage(images.white_bubble, 0, 0);
+      g.restore();
+    }
+  }
+
   class Treasure extends GameObject {
     end = true;
     export = true;
     background = true;
     constructor({ y }) {
       super({ x: 0, y });
-      this.image = images["treasure"];
+      this.image = images.treasure_closed;
     }
 
     get bottom() {
@@ -511,6 +542,19 @@ function startGame(err) {
 
     drawBackground(g) {
       g.drawCenteredImage(this.image, this.position.x, this.position.y);
+    }
+
+    open() {
+      this.image = images.treasure;
+
+      const minx = this.position.x + (1105 - 1024);
+      const maxx = this.position.x + (1555 - 1024);
+      const y = this.position.y + (1400 - 1024);
+
+      for (let x = minx; x < maxx; x += 20) {
+        const bubble = new Bubble({ x, y });
+        game.objects.add(bubble);
+      }
     }
   }
 
@@ -606,6 +650,9 @@ function startGame(err) {
             items: [Start, ClownFish, Octopus, FootballFish, Treasure],
           })
         );
+      } else if (key === "9") {
+        this.player.position.y =
+          this.game.objects.lists.end.first.position.y - 200;
       } else if (key === "0") {
         this.game.changeState(new EndState({ game }));
       }
@@ -639,6 +686,8 @@ function startGame(err) {
 
       // Check win condition
       if (this.player.position.y > end.position.y) {
+        end.open();
+        this.player.sinkRate = 0;
         this.game.changeState(
           this.game.levelSystem.hasNextLevel()
             ? new WinState({ game })
@@ -938,9 +987,8 @@ function startGame(err) {
       game.changeState(new BeginState({ game }));
     }
 
-    update(/*dt, next*/) {
-      // Avoid updating the game.
-      //
+    update(dt, next) {
+      next(dt);
     }
   }
 
