@@ -291,13 +291,13 @@ function startGame(err) {
   }
 
   class FootballFish extends Fish {
-    constructor({ x, y }) {
+    constructor({ x, y, angle, speed }) {
       super({
         x,
         y,
         image: images.football,
-        angle: 45,
-        speed: 200,
+        angle: angle ?? 45,
+        speed: speed ?? 200,
         top: -100,
         bottom: 100,
         left: -800,
@@ -337,13 +337,13 @@ function startGame(err) {
   }
 
   class Octopus extends Fish {
-    constructor({ x, y }) {
+    constructor({ x, y, angle, speed }) {
       super({
         x,
         y,
         image: images.octopus_0,
-        angle: 15,
-        speed: 300,
+        angle: angle ?? 15,
+        speed: speed ?? 300,
         top: -200,
         left: -200,
         bottom: 200,
@@ -382,13 +382,13 @@ function startGame(err) {
 
   class Seahorse extends Fish {
     //TODO: give rect collision please :)
-    constructor({ x, y }) {
+    constructor({ x, y, angle, speed }) {
       super({
         x,
         y,
         image: images.seahorse,
-        angle: 0,
-        speed: 200,
+        angle: angle ?? 0,
+        speed: speed ?? 200,
         top: 0,
         right: 1400,
         bottom: 0,
@@ -669,6 +669,26 @@ function startGame(err) {
         new Treasure({ x: 0, y: 4500 }),
       ],
       clone: level_sym2,
+      nextLevel: level_sym3,
+    };
+  }
+
+  function level_sym3() {
+    return {
+      name: "Level 3",
+      objects: [
+        new Start({ x: 0, y: 0 }),
+        new Treasure({ x: -24, y: 9812 }),
+        new Seahorse({ x: 790, y: 8310, angle: 180 }),
+        new Seahorse({ x: -653, y: 7275 }),
+        new FootballFish({ x: 441, y: 5297 }),
+        new FootballFish({ x: 627, y: 5522 }),
+        new FootballFish({ x: -459, y: 3313, angle: 315 }),
+        new FootballFish({ x: -699, y: 3577, angle: 315 }),
+        new Octopus({ x: 674, y: 2157 }),
+        new Octopus({ x: -521, y: 1148, angle: 345 }),
+      ],
+      clone: level_sym3,
       nextLevel: null,
     };
   }
