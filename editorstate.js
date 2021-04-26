@@ -4,7 +4,6 @@ import Vector from "./vector.js";
 class EditorState {
   items = [];
   item = null;
-  leveldef = [];
   constructor({ game, items, gameplayState }) {
     this.game = game;
     this.items = items;
@@ -16,14 +15,15 @@ class EditorState {
     this.keydown = this.keydown.bind(this);
     this.update = this.update.bind(this);
   }
+
   enable() {
     console.log("enable editor");
+    this.game.levelSystem.restartLevel();
+
     this.game.chains.draw.push(this.draw);
     this.game.on("mousedown", this.mousedown);
     this.game.on("keydown", this.keydown);
-    this.game.chains.update.push(this.update);
-    this.game.chains.update.remove(this.game.chains.update.camera);
-    this.game.chains.update.remove(this.game.chains.update.objects);
+    this.game.chains.update.unshift(this.update);
   }
 
   disable() {
@@ -32,34 +32,19 @@ class EditorState {
     this.game.removeListener("mousedown", this.mousedown);
     this.game.removeListener("keydown", this.keydown);
     this.game.chains.update.remove(this.update);
-    this.game.chains.update.push(this.game.chains.update.camera);
-    this.game.chains.update.push(this.game.chains.update.objects);
   }
 
   update(dt, next) {
     const movement = new Vector(
       (this.game.keys.right ? 1 : 0) - (this.game.keys.left ? 1 : 0),
-      (this.game.keys.up ? 1 : 0) - (this.game.keys.down ? 1 : 0)
+      (this.game.keys.down ? 1 : 0) - (this.game.keys.up ? 1 : 0)
     );
-    this.game.camera.x += movement.x * dt * 10;
-    this.game.camera.y += movement.y * dt * 10;
+    // this.game.camera.x += movement.x * dt * 500;
+    this.game.camera.y += movement.y * dt * 2000;
     this.game.objects.handlePending();
-    next(dt);
-  }
 
-  createLevel() {
-    return {
-      name: "level",
-      objects: this.leveldef.map(
-        ([item, x, y]) =>
-          new item({
-            x,
-            y,
-          })
-      ),
-      clone: this.createLevel.bind(this),
-      nextLevel: this.createLevel.bind(this),
-    };
+    // Stop updating rest of game.
+    // next(dt);
   }
 
   getPosition() {
@@ -72,7 +57,6 @@ class EditorState {
 
   place() {
     var p = this.getPosition();
-    this.leveldef.push([this.item, p.x, p.y]);
     this.game.objects.add(
       new this.item({
         x: p.x,
@@ -82,22 +66,25 @@ class EditorState {
   }
 
   deleteItem() {
-    var p = this.getPosition();
-    const obj = this.getCell(p.x, p.y);
-    obj.forEach((o) => o.destroy());
-    this.leveldef = this.leveldef.filter(([, x, y]) => x !== p.x || y !== p.y);
-  }
-
-  load() {
-    this.leveldef = [];
-    for (const obj of this.game.objects.lists.export) {
-      this.leveldef.push([obj.constructor, obj.position.x, obj.position.y]);
-    }
+    const position = this.getPosition();
+    const closest = [...this.game.objects.lists.export].reduce(
+      (closest, current) => {
+        return !current ||
+          position.distanceToV(current.position) <
+            position.distanceToV(closest.position)
+          ? current
+          : closest;
+      }
+    );
+    this.game.objects.remove(closest);
   }
 
   save() {
-    let str = this.leveldef
-      .map(([item, x, y]) => `new ${item.name}({ x: ${x}, y: ${y}}),`)
+    let str = [...this.game.objects.lists.export]
+      .map(
+        ({ constructor, x, y }) =>
+          `new ${constructor.name}({ x: ${x}, y: ${y}}),`
+      )
       .join("\n");
     window.navigator.clipboard.writeText(str).then(() => {
       console.log("level copied to clipboard");
@@ -112,15 +99,39 @@ class EditorState {
     }
   }
 
+  play() {
+    const levelObjects = [...this.game.objects.lists.export].map((object) => ({
+      constructor: object.constructor,
+      x: object.position.x,
+      y: object.position.y,
+    }));
+    function createLevel() {
+      return {
+        name: "level",
+        objects: levelObjects.map(
+          ({ constructor, x, y }) =>
+            new constructor({
+              x,
+              y,
+            })
+        ),
+        clone: createLevel,
+        nextLevel: createLevel,
+      };
+    }
+    this.game.levelSystem.changeLevel(createLevel());
+    this.game.changeState(this.gameplayState);
+  }
+
   keydown(key) {
     if (key === "p") {
       this.save();
-    } else if (key === "i") {
-      this.load();
     } else if (key === "e") {
-      this.game.changeState(this.gameplayState);
+      this.play();
     } else if (key === "r") {
-      this.game.changeLevel(this.createLevel());
+      this.game.levelSystem.restartLevel();
+    } else if (key === "d") {
+      this.deleteItem();
     }
 
     var d = (key === "]" ? 1 : 0) - (key === "[" ? 1 : 0);

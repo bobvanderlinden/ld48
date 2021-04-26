@@ -75,6 +75,7 @@ function startGame(err) {
   g.objects.lists.export = g.objects.createIndexList("export");
   g.objects.lists.end = g.objects.createIndexList("end");
   g.objects.lists.editorVisible = g.objects.createIndexList("editorVisible");
+  g.objects.lists.player = g.objects.createIndexList("player");
 
   // function pickRandom(arr) {
   //   return arr[(arr.length * Math.random()) | 0];
@@ -158,6 +159,7 @@ function startGame(err) {
     touchable = true;
     foreground = true;
     touchable = true;
+    player = true;
     targetPosition = new Vector(0, 0);
     lifeTime = 0;
 

@@ -6,7 +6,7 @@ class LevelSystem {
 
   changeLevel(level) {
     if (this.level) {
-      for (const c of this.objects.objects) {
+      for (const c of this.game.objects.objects) {
         this.game.objects.remove(c);
       }
       if (this.level.disable) {
@@ -28,7 +28,7 @@ class LevelSystem {
     this.game.emit("levelchanged");
   }
   restartLevel() {
-    this.game.changeLevel(this.level.clone());
+    this.changeLevel(this.level.clone());
   }
   hasNextLevel(level) {
     const _level = level || this.level;
