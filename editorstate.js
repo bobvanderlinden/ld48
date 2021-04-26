@@ -82,8 +82,8 @@ class EditorState {
   save() {
     let str = [...this.game.objects.lists.export]
       .map(
-        ({ constructor, x, y }) =>
-          `new ${constructor.name}({ x: ${x}, y: ${y}}),`
+        ({ constructor, position }) =>
+          `new ${constructor.name}({ x: ${position.x}, y: ${position.y}}),`
       )
       .join("\n");
     window.navigator.clipboard.writeText(str).then(() => {
