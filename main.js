@@ -32,6 +32,8 @@ var rs = {
     "background",
     "background_2",
     "air",
+    "begin",
+    "end",
   ],
 };
 var g, game;
@@ -470,18 +472,6 @@ function startGame(err) {
     }
   }
 
-  // draw responsive image which keeps to canvas boundaries
-
-  // function drawOverlayImage(g, image) {
-  //   g.save();
-  //   const scaleX = game.width / image.width;
-  //   const scaleY = game.height / image.height;
-  //   const scale = Math.min(scaleX, scaleY);
-  //   g.context.scale(scale, scale);
-  //   g.drawCenteredImage(image, game.width / 2 / scale, game.height / 2 / scale);
-  //   g.restore();
-  // }
-
   class GameplayState {
     constructor({ game }) {
       this.game = game;
@@ -541,6 +531,8 @@ function startGame(err) {
             items: [Start, ClownFish, Octopus, FootballFish, Treasure],
           })
         );
+      } else if (key === "0") {
+        this.game.changeState(new EndState({ game }));
       }
 
       const movement = new Vector(
@@ -567,8 +559,93 @@ function startGame(err) {
 
       // Check win condition
       if (this.player.position.y > end.position.y) {
-        this.game.changeState(new WinState());
+        this.game.changeState(
+          this.game.levelSystem.hasNextLevel()
+            ? new WinState({ game })
+            : new EndState({ game })
+        );
       }
+    }
+  }
+
+  class MenuState {
+    constructor({ game }) {
+      this.game = game;
+      this.draw = this.draw.bind(this);
+      this.mousedown = this.mousedown.bind(this);
+    }
+
+    enable() {
+      this.game.camera.reset();
+      this.game.levelSystem.changeLevel(null);
+      this.game.chains.draw.push(this.draw);
+      this.game.on("mousedown", this.mousedown);
+    }
+
+    disable() {
+      this.game.chains.draw.remove(this.draw);
+      this.game.removeListener("mousedown", this.mousedown);
+    }
+
+    mousedown() {
+      this.game.levelSystem.changeLevel(level_sym1());
+      this.game.changeState(new GameplayState({ game: this.game }));
+    }
+
+    draw(g, next) {
+      next(g);
+
+      g.drawCenteredImage(images.begin, 0, game.camera.y + 1000);
+    }
+  }
+
+  class EndState {
+    lifetime = 0;
+    constructor({ game }) {
+      this.game = game;
+      this.draw = this.draw.bind(this);
+      this.update = this.update.bind(this);
+      this.mousedown = this.mousedown.bind(this);
+    }
+
+    enable() {
+      this.game.chains.draw.push(this.draw);
+      this.game.chains.update.unshift(this.update);
+      this.game.on("mousedown", this.mousedown);
+    }
+
+    disable() {
+      this.game.chains.draw.remove(this.draw);
+      this.game.chains.update.remove(this.update);
+      this.game.removeListener("mousedown", this.mousedown);
+    }
+
+    mousedown() {
+      if (this.lifetime < 2) {
+        return;
+      }
+      this.game.changeState(new MenuState({ game: this.game }));
+    }
+
+    draw(g, next) {
+      next(g);
+
+      const startTime = 1;
+      const fadeTime = 3;
+      g.context.globalAlpha = Math.max(
+        0,
+        Math.min(this.lifetime - startTime, fadeTime) / fadeTime
+      );
+      g.drawCenteredImage(images.end, 0, game.camera.y - 1000);
+      g.context.globalAlpha = 1;
+    }
+
+    update(dt, next) {
+      const lifetime = (this.lifetime += dt);
+
+      const slowDownTime = 3;
+      const timeScale = 1 - Math.min(lifetime, slowDownTime) / slowDownTime;
+      next(timeScale * dt);
     }
   }
 
@@ -774,9 +851,7 @@ function startGame(err) {
     }
   }
 
-  game.levelSystem.changeLevel(level_sym1());
-  game.objects.handlePending();
-  game.changeState(new GameplayState({ game }));
+  game.changeState(new MenuState({ game }));
   game.start();
   window.game = game;
 }
