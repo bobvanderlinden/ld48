@@ -36,6 +36,13 @@
       "ecmaVersion": 12,
       "sourceType": "module"
     },
-    "rules": {}
+    "rules": {
+      "no-unused-vars": [
+        "error",
+        {
+          "args": "none"
+        }
+      ]
+    }
   }
 }
