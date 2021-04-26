@@ -35,6 +35,7 @@ var rs = {
     "begin",
     "end",
     "starfish",
+    "jelly",
   ],
 };
 var g, game;
@@ -341,17 +342,17 @@ function startGame(err) {
   }
 
   class Octopus extends Fish {
-    constructor({ x, y, angle, speed }) {
+    constructor({ x, y, angle, speed, top, right, bottom, left }) {
       super({
         x,
         y,
         image: images.octopus_0,
         angle: angle ?? 15,
         speed: speed ?? 300,
-        top: -200,
-        left: -200,
-        bottom: 200,
-        right: 200,
+        top: top ?? -200,
+        right: right ?? 200,
+        bottom: bottom ?? 200,
+        left: left ?? -200,
       });
       this.frame = 0;
     }
@@ -450,7 +451,7 @@ function startGame(err) {
       g.context.translate(this.position.x, this.position.y);
       g.context.rotate(this.velocity.angle());
       g.context.scale(this.direction, this.direction);
-      g.drawCenteredImage(images.clown, 0, 0);
+      g.drawCenteredImage(images.jelly, 0, 0);
       g.restore();
     }
   }
@@ -780,11 +781,11 @@ function startGame(err) {
       objects: [
         new Start({ x: 0, y: 0 }),
         new WavyFish({ x: 500, y: 1000 }),
-        new ClownFish({ x: 300, y: 1000 }),
         new Octopus({ x: 60, y: 2000 }),
         new FootballFish({ x: 80, y: 3000 }),
         new Seahorse({ x: 200, y: 4000 }),
-        new Treasure({ x: 0, y: 4500 }),
+        new StarFish({ x: 80, y: 5000 }),
+        new Treasure({ x: 0, y: 5500 }),
       ],
       clone: level_sym2,
       nextLevel: level_sym3,
@@ -796,15 +797,22 @@ function startGame(err) {
       name: "Level 3",
       objects: [
         new Start({ x: 0, y: 0 }),
-        new Treasure({ x: -24, y: 9812 }),
-        new Seahorse({ x: 790, y: 8310, angle: 180 }),
-        new Seahorse({ x: -653, y: 7275 }),
-        new FootballFish({ x: 441, y: 5297 }),
-        new FootballFish({ x: 627, y: 5522 }),
-        new FootballFish({ x: -459, y: 3313, angle: 315 }),
-        new FootballFish({ x: -699, y: 3577, angle: 315 }),
-        new Octopus({ x: 674, y: 2157 }),
-        new Octopus({ x: -521, y: 1148, angle: 345 }),
+        new Treasure({ x: -24, y: 6512 }),
+        new Seahorse({ x: 790, y: 5710 }),
+        new Seahorse({ x: -653, y: 5275 }),
+        new FootballFish({ x: 441, y: 3797 }),
+        new FootballFish({ x: 627, y: 4022 }),
+        new FootballFish({ x: -459, y: 2813, angle: 315 }),
+        new FootballFish({ x: -699, y: 3077, angle: 315 }),
+        new Octopus({
+          x: 674,
+          y: 1500,
+          top: -400,
+          right: 400,
+          bottom: 400,
+          left: -400,
+        }),
+        new Octopus({ x: -521, y: 1000, angle: 345 }),
       ],
       clone: level_sym3,
       nextLevel: null,
