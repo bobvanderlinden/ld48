@@ -1,13 +1,16 @@
-# ld48
+# ld48: Just Keep Sinking
 
-A game for Ludum Dare 48
+The theme of Ludum Dare 48: Deeper and Deeper
 
-[Play here](https://bobvanderlinden.github.com/ld48/)
+Let's explore the depths of the oceans and hunt for some treasure.
 
-[Ludum Dare entry](https://ldjam.com/events/ludum-dare/45/$167315)
+[Play here](https://bobvanderlinden.github.io/ld48/)
+
+[Ludum Dare entry](https://ldjam.com/events/ludum-dare/48/just-keep-sinking)
 
 ## Credits
 
-- [@minthamie](https://github.com/minthamie/)
-- [@nickschot](https://github.com/nickschot/)
-- [@bobvanderlinden](https://github.com/bobvanderlinden/)
+- [@minthamie - Art](https://github.com/minthamie/)
+- [@nickschot - The brains](https://github.com/nickschot/)
+- [@bobvanderlinden - Lead Dev](https://github.com/bobvanderlinden/)
+- [@timendus - Music](https://github.com/timendus)
