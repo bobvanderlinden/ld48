@@ -100,16 +100,22 @@ function startGame(err) {
     g.context.fillStyle = "#0fb0fe";
     g.context.fillRect(0, 0, 2048, 9999999);
 
-    g.context.fillStyle = g.context.createPattern(
-      images["background"],
-      "repeat"
-    );
+    if (!game.backgroundPattern) {
+      game.backgroundPattern = g.context.createPattern(
+        images.background,
+        "repeat"
+      );
+    }
+    g.context.fillStyle = game.backgroundPattern;
     g.context.fillRect(0, 0, 2048, 9999999);
 
+    if (!game.bubblesPattern) {
+      game.bubblesPattern = g.context.createPattern(images.bubbles, "repeat");
+    }
     g.context.scale(0.2, 0.2);
     g.save();
     g.context.translate(0, (game.time * -200) % images["bubbles"].height);
-    g.context.fillStyle = g.context.createPattern(images["bubbles"], "repeat");
+    g.context.fillStyle = game.bubblesPattern;
     g.context.fillRect(0, 0, 2048, 9999999);
     g.restore();
 
