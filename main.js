@@ -111,6 +111,16 @@ function startGame(err) {
 
   game.levelSystem = new LevelSystem({ game });
 
+  function drawTiled(g, image) {
+    const screenHeight = game.height / game.camera.getPixelsPerMeter();
+    const screenTop = game.camera.y - screenHeight * 0.5;
+    const screenBottom = game.camera.y + screenHeight * 0.5;
+    const tilingTop = (Math.floor(screenTop / image.height) - 1) * image.height;
+    for (let y = tilingTop; y < screenBottom; y += image.height) {
+      g.context.drawImage(image, 0, y);
+    }
+  }
+
   game.chains.draw.push((g, next) => {
     g.save();
     g.context.translate(-1024, 0);
@@ -118,23 +128,8 @@ function startGame(err) {
     g.context.fillStyle = "#0fb0fe";
     g.context.fillRect(0, 0, 2048, 9999999);
 
-    if (!game.backgroundPattern) {
-      game.backgroundPattern = g.context.createPattern(
-        images.background_2,
-        "repeat"
-      );
-    }
-    g.context.fillStyle = game.backgroundPattern;
-    g.context.fillRect(0, 0, 2048, 9999999);
-
-    if (!game.bubblesPattern) {
-      game.bubblesPattern = g.context.createPattern(images.bubbles, "repeat");
-    }
-    g.save();
-    g.context.translate(0, (game.time * -200) % images["bubbles"].height);
-    g.context.fillStyle = game.bubblesPattern;
-    g.context.fillRect(0, 0, 2048, 9999999);
-    g.restore();
+    drawTiled(g, images.background_2);
+    drawTiled(g, images.bubbles);
 
     g.drawCenteredImage(images["air"], 1024, -images["air"].height / 2 + 64);
 
