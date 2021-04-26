@@ -815,6 +815,58 @@ function startGame(err) {
         new Octopus({ x: -521, y: 1000, angle: 345 }),
       ],
       clone: level_sym3,
+      nextLevel: level_sym4,
+    };
+  }
+
+  function level_sym4() {
+    return {
+      name: "Level 4",
+      objects: [
+        new Treasure({ x: -200, y: 10352 }),
+        new Octopus({
+          x: 588,
+          y: 9610,
+          angle: 330,
+          speed: 600,
+          top: -400,
+          right: 400,
+          bottom: 400,
+          left: -400,
+        }),
+        new Octopus({ x: -235, y: 9285 }),
+        new WavyFish({ x: -290, y: 7976 }),
+        new StarFish({ x: 10, y: 7871 }),
+        new FootballFish({ x: -176, y: 7604 }),
+        new StarFish({ x: 540, y: 7335, speed: 400 }),
+        new StarFish({ x: -625, y: 5994 }),
+        new Seahorse({ x: 660, y: 5058, speed: 350 }),
+        new ClownFish({ x: 765, y: 4772 }),
+        new Octopus({
+          x: -706,
+          y: 4101,
+          top: -400,
+          right: 400,
+          bottom: 400,
+          left: -400,
+        }),
+        new Octopus({
+          x: 806,
+          y: 3805,
+          top: -400,
+          right: 400,
+          bottom: 400,
+          left: -400,
+        }),
+        new WavyFish({ x: 883, y: 2128 }),
+        new WavyFish({ x: 383, y: 2768 }),
+        new WavyFish({ x: -396, y: 2128 }),
+        new StarFish({ x: 355, y: 1481 }),
+        new StarFish({ x: -777, y: 875 }),
+        new StarFish({ x: 777, y: 875 }),
+        new Start({ x: 0, y: 0 }),
+      ],
+      clone: level_sym4,
       nextLevel: null,
     };
   }
