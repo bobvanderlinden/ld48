@@ -11,11 +11,11 @@ jobs:
         run: |
           npm install
           mkdir -p build
-          cp -r index.html main.css assets build/
+          cp -r index.html main.css assets docs/
           npm run build
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@4.1.1
         with:
           branch: gh-pages
-          folder: build
+          folder: docs
